@@ -91,8 +91,8 @@ export default function PrivacyPage() {
       <h2>Contact</h2>
       <p>
         Privacy questions:{" "}
-        <a className="font-medium text-primary hover:underline" href="mailto:tmrapp1995@gmail.com">
-          tmrapp1995@gmail.com
+        <a className="font-medium text-primary hover:underline" href="mailto:hello@info.gbpranker.com">
+          hello@info.gbpranker.com
         </a>
         .
       </p>

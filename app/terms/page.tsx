@@ -89,8 +89,8 @@ export default function TermsPage() {
       <h2>Contact</h2>
       <p>
         Questions about these terms:{" "}
-        <a className="font-medium text-primary hover:underline" href="mailto:tmrapp1995@gmail.com">
-          tmrapp1995@gmail.com
+        <a className="font-medium text-primary hover:underline" href="mailto:hello@info.gbpranker.com">
+          hello@info.gbpranker.com
         </a>
         .
       </p>
