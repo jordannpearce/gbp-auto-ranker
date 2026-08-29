@@ -1,20 +1,9 @@
-"use client";
-
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function DashboardHeader() {
-  const router = useRouter();
-
-  async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/dashboard/login");
-    router.refresh();
-  }
-
   return (
     <header className="border-b border-border bg-white">
       <div className="mx-auto flex h-[5.25rem] w-full max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -36,14 +25,14 @@ export function DashboardHeader() {
           >
             New intake
           </Link>
-          <Button
-            type="button"
-            variant="ghost"
-            className="h-9 px-3"
-            onClick={logout}
-          >
-            Sign out
-          </Button>
+          <form action="/api/auth/logout" method="post">
+            <button
+              type="submit"
+              className={cn(buttonVariants({ variant: "ghost" }), "h-9 px-3")}
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </div>
     </header>

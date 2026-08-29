@@ -9,7 +9,13 @@ export const metadata: Metadata = {
     "Send your Google Business Profile, Maps link, and target keywords so GBP Auto Ranker can start ranking the listing.",
 };
 
-export default function GetStartedPage() {
+export default async function GetStartedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   return (
     <div className="flex min-h-full flex-1 flex-col bg-surface">
       <SiteHeader />
@@ -27,7 +33,7 @@ export default function GetStartedPage() {
             dashboard so the campaign can start with the right profile.
           </p>
           <div className="mt-8 rounded-2xl border border-border bg-white p-5 shadow-[0_16px_50px_-36px_rgba(8,43,117,0.45)] sm:p-8">
-            <IntakeForm />
+            <IntakeForm error={error} />
           </div>
         </div>
       </main>

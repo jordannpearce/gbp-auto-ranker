@@ -38,4 +38,14 @@ export function checkPassword(input: string) {
   return input === password();
 }
 
+export function sessionCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 14,
+  };
+}
+
 export { COOKIE_NAME };

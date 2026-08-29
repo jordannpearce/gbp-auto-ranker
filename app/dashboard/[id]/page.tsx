@@ -20,10 +20,13 @@ export async function generateMetadata({
 
 export default async function CustomerPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string; saved?: string }>;
 }) {
   const { id } = await params;
+  const { error, saved } = await searchParams;
   const customer = await getCustomer(id);
   if (!customer) notFound();
 
@@ -31,7 +34,11 @@ export default async function CustomerPage({
     <div className="flex min-h-full flex-1 flex-col bg-surface">
       <DashboardHeader />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
-        <CustomerDetail customer={customer} />
+        <CustomerDetail
+          customer={customer}
+          error={error}
+          saved={saved === "1"}
+        />
       </main>
     </div>
   );

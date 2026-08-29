@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import { useMemo, useState } from "react";
 import {
   Building2,
   KeyRound,
@@ -10,46 +7,44 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { selectClassName } from "@/components/field";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { formatLocation, STATUS_LABELS } from "@/lib/customers";
 import { formatDate } from "@/lib/format";
-import type { CampaignStatus, Customer } from "@/lib/types";
 import { customerStats } from "@/lib/stats";
+import type { CampaignStatus, Customer } from "@/lib/types";
+import { CAMPAIGN_STATUSES } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 type DashboardViewProps = {
   customers: Customer[];
+  query: string;
+  status: CampaignStatus | "all";
 };
 
-export function DashboardView({ customers }: DashboardViewProps) {
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<CampaignStatus | "all">("all");
+export function DashboardView({
+  customers,
+  query,
+  status,
+}: DashboardViewProps) {
   const stats = customerStats(customers);
-
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return customers.filter((customer) => {
-      const matchesStatus = status === "all" || customer.status === status;
-      const haystack = [
-        customer.businessName,
-        customer.contactName,
-        customer.email,
-        customer.category,
-        customer.city,
-        customer.state,
-        ...customer.keywords,
-      ]
-        .join(" ")
-        .toLowerCase();
-      return matchesStatus && (!needle || haystack.includes(needle));
-    });
-  }, [customers, query, status]);
+  const needle = query.trim().toLowerCase();
+  const filtered = customers.filter((customer) => {
+    const matchesStatus = status === "all" || customer.status === status;
+    const haystack = [
+      customer.businessName,
+      customer.contactName,
+      customer.email,
+      customer.category,
+      customer.city,
+      customer.state,
+      ...customer.keywords,
+    ]
+      .join(" ")
+      .toLowerCase();
+    return matchesStatus && (!needle || haystack.includes(needle));
+  });
 
   return (
     <div className="space-y-8">
@@ -80,35 +75,39 @@ export function DashboardView({ customers }: DashboardViewProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <form
+        action="/dashboard"
+        method="get"
+        className="flex flex-col gap-3 sm:flex-row sm:items-center"
+      >
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            name="q"
+            defaultValue={query}
             placeholder="Search business, contact, city, or keyword"
-            className="h-10 pl-9"
+            className="pl-9"
           />
         </div>
-        <Select
-          value={status}
-          onValueChange={(value) =>
-            setStatus((value as CampaignStatus | "all") ?? "all")
-          }
+        <select
+          name="status"
+          defaultValue={status}
+          className={cn(selectClassName, "sm:w-48")}
         >
-          <SelectTrigger className="h-10 w-full sm:w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            {Object.entries(STATUS_LABELS).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+          <option value="all">All statuses</option>
+          {CAMPAIGN_STATUSES.map((value) => (
+            <option key={value} value={value}>
+              {STATUS_LABELS[value]}
+            </option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className={cn(buttonVariants({ variant: "outline" }), "h-10 px-4")}
+        >
+          Filter
+        </button>
+      </form>
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-white px-6 py-16 text-center">

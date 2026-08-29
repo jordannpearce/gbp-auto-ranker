@@ -6,8 +6,10 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isDashboard =
     pathname.startsWith("/dashboard") && pathname !== "/dashboard/login";
+  const isPublicIntake =
+    pathname === "/api/customers" && request.method === "POST";
   const isProtectedApi =
-    pathname.startsWith("/api/customers") && request.method !== "POST";
+    pathname.startsWith("/api/customers") && !isPublicIntake;
 
   if (!isDashboard && !isProtectedApi) {
     return NextResponse.next();
@@ -19,6 +21,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isProtectedApi) {
+    const contentType = request.headers.get("content-type") || "";
+    if (contentType.includes("form")) {
+      return NextResponse.redirect(
+        new URL("/dashboard/login?next=%2Fdashboard", request.url),
+      );
+    }
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 

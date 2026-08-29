@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { DashboardView } from "@/components/dashboard-view";
 import { listCustomers } from "@/lib/store";
+import { CAMPAIGN_STATUSES, type CampaignStatus } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Customer dashboard",
@@ -9,8 +10,17 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string }>;
+}) {
+  const { q, status } = await searchParams;
   const customers = await listCustomers();
+  const selectedStatus =
+    status && CAMPAIGN_STATUSES.includes(status as CampaignStatus)
+      ? (status as CampaignStatus)
+      : "all";
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-surface">
@@ -26,7 +36,11 @@ export default async function DashboardPage() {
             refine the term list.
           </p>
         </div>
-        <DashboardView customers={customers} />
+        <DashboardView
+          customers={customers}
+          query={q ?? ""}
+          status={selectedStatus}
+        />
       </main>
     </div>
   );

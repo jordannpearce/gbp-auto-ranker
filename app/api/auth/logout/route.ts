@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
-import { COOKIE_NAME } from "@/lib/auth";
+import { COOKIE_NAME, sessionCookieOptions } from "@/lib/auth";
+import { redirectTo } from "@/lib/http";
 
-export async function POST() {
-  const response = NextResponse.json({ ok: true });
+export async function POST(request: Request) {
+  const wantsRedirect =
+    !(request.headers.get("content-type") || "").includes("application/json");
+  const response = wantsRedirect
+    ? redirectTo("/dashboard/login")
+    : NextResponse.json({ ok: true });
   response.cookies.set(COOKIE_NAME, "", {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
+    ...sessionCookieOptions(),
     maxAge: 0,
   });
   return response;
