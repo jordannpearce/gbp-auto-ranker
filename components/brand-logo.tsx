@@ -9,9 +9,9 @@ type BrandLogoProps = {
 };
 
 const sizes = {
-  nav: { width: 168, height: 168, className: "h-14 w-14 sm:h-16 sm:w-16" },
-  hero: { width: 280, height: 280, className: "h-40 w-40 sm:h-52 sm:w-52" },
-  auth: { width: 200, height: 200, className: "h-28 w-28" },
+  nav: { width: 168, height: 168, className: "h-[4.5rem] w-[4.5rem] sm:h-20 sm:w-20" },
+  hero: { width: 280, height: 280, className: "h-44 w-44 sm:h-56 sm:w-56" },
+  auth: { width: 200, height: 200, className: "h-32 w-32" },
 };
 
 export function BrandLogo({

@@ -17,7 +17,7 @@ export function DashboardHeader() {
 
   return (
     <header className="border-b border-border bg-white">
-      <div className="mx-auto flex h-[4.25rem] w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-[5.25rem] w-full max-w-6xl items-center justify-between px-4 sm:px-6">
         <div className="flex items-center gap-3">
           <BrandLogo />
           <div className="hidden sm:block">
