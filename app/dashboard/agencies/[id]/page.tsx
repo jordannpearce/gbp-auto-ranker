@@ -26,12 +26,12 @@ export default async function AgencyDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; created?: string }>;
 }) {
   const { user, agency: currentAgency } = await loadDashboardUser();
   if (!isAdmin(user)) redirect("/dashboard");
   const { id } = await params;
-  const { error, saved } = await searchParams;
+  const { error, saved, created } = await searchParams;
   const agency = await getAgency(id);
   if (!agency) notFound();
 
@@ -60,6 +60,29 @@ export default async function AgencyDetailPage({
             Assign unassigned business customers to this agency and pick the
             user who will manage each one.
           </p>
+          {created ? (
+            <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              Agency created. The owner can sign in with the email and
+              temporary password you set.
+            </p>
+          ) : null}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href={`/dashboard/clients/new?agencyId=${agency.id}`}
+              className={cn(
+                buttonVariants(),
+                "h-10 px-4 font-semibold brand-gradient text-white",
+              )}
+            >
+              Add client to this agency
+            </Link>
+            <Link
+              href="/dashboard/team"
+              className={cn(buttonVariants({ variant: "outline" }), "h-10 px-4")}
+            >
+              Add a user
+            </Link>
+          </div>
         </div>
 
         <section className="rounded-2xl border border-border bg-white p-6">

@@ -2,19 +2,69 @@ import { Field, FormSection, selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { Agency, PublicUser } from "@/lib/types";
 import { PRIMARY_GOALS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function IntakeForm({
   error,
   returnTo,
+  assignment,
 }: {
   error?: string;
   returnTo?: string;
+  assignment?: {
+    agencies: Agency[];
+    users: PublicUser[];
+    defaultAgencyId?: string;
+  };
 }) {
   return (
     <form action="/api/customers" method="post" className="space-y-10">
       {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
+      {assignment ? (
+        <FormSection
+          eyebrow="Assignment"
+          title="Who owns this campaign?"
+          copy="Leave unassigned to keep it in the admin queue, or give it to an agency now."
+        >
+          <Field label="Agency" htmlFor="agencyId">
+            <select
+              id="agencyId"
+              name="agencyId"
+              defaultValue={assignment.defaultAgencyId || ""}
+              className={selectClassName}
+            >
+              <option value="">Unassigned</option>
+              {assignment.agencies.map((agency) => (
+                <option key={agency.id} value={agency.id}>
+                  {agency.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Agency user" htmlFor="managerUserId">
+            <select
+              id="managerUserId"
+              name="managerUserId"
+              defaultValue=""
+              className={selectClassName}
+            >
+              <option value="">Whole agency</option>
+              {assignment.users
+                .filter((item) => item.role !== "admin")
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                    {assignment.agencies.find((agency) => agency.id === item.agencyId)
+                      ? ` · ${assignment.agencies.find((agency) => agency.id === item.agencyId)?.name}`
+                      : ""}
+                  </option>
+                ))}
+            </select>
+          </Field>
+        </FormSection>
+      ) : null}
       <FormSection
         eyebrow="Contact"
         title="Who should we work with?"
@@ -170,7 +220,7 @@ export function IntakeForm({
             name="keywords"
             required
             rows={5}
-            placeholder={"dentist near me\nemergency dentist Sausalito\nteeth whitening"}
+            placeholder={"dentist near me\nemergency dentist\nteeth whitening"}
           />
         </Field>
         <Field
@@ -241,8 +291,8 @@ export function IntakeForm({
 
       <div className="flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          Submissions land in the customer dashboard so the campaign can start
-          with the exact keywords you listed.
+          Save this listing so the campaign can start with the keywords you
+          listed.
         </p>
         <button
           type="submit"

@@ -11,17 +11,17 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 - Email/password login, forgot-password reset, and agency signup with email confirmation
 - Transactional and broadcast email through [Resend](https://resend.com): confirmations, welcome, resets, intake receipts, assignment notices, team invites, plus admin marketing/info/update emails
 - Admin Emails page to save the Resend API key, from-address, and editable templates
-- Admin dashboard: all customers, assign listings to agency users, compose emails
-- Agency dashboard: clients the agency manages, plus extra team users
+- Admin dashboard: add agencies, users, and customers; assign listings to agencies
+- Agency dashboard: add their own clients, manage team seats, and run campaigns
 - Postgres on Railway for accounts, customers, and the email log, with JSON files as a local fallback
 
 ## Accounts
 
 | Role | What they see |
 | --- | --- |
-| Admin | Every customer. Assigns businesses to an SEO agency and to a specific agency user. |
+| Admin | Every customer. Manually adds agencies, users, and customers, then assigns listings to an agency or a specific user. |
 | Agency owner | Agency clients, team roster, ability to add users and new clients. |
-| Agency user | The same client book for that agency. |
+| Agency user | The same client book, plus the ability to add clients for that agency. |
 
 The live admin account is created for the operator and is not shown on the public login page. Sample clients and the old demo agency are not seeded.
 
@@ -44,6 +44,9 @@ Open [http://127.0.0.1:4410](http://127.0.0.1:4410).
 | `/login` | User login |
 | `/signup` | Agency account creation (confirmation email) |
 | `/dashboard` | Role-aware workspace |
+| `/dashboard/clients/new` | Add a customer (admin can assign an agency) |
+| `/dashboard/agencies/new` | Admin creates an agency and owner login |
+| `/dashboard/team` | Add users (admins, owners, or agency seats) |
 | `/dashboard/emails` | Admin Resend settings, templates, composer, and send log |
 
 Without `DATABASE_URL`, records are written to `data/*.json`. With Postgres, the same tables are used. First boot creates the operator admin only — no sample clients or agencies.

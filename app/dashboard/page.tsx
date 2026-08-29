@@ -49,8 +49,8 @@ export default async function DashboardPage({
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             {isAdmin(user)
-              ? "Assign business listings to SEO agency accounts so their teams can white-label the campaign."
-              : "These are the businesses assigned to your agency. Open a client to see the keywords and Maps listing you are ranking."}
+              ? "Add customers here, then assign them to an agency. Open a listing to change the assignment."
+              : "These are the businesses assigned to your agency. Add a client or open one to see the keywords and Maps listing."}
           </p>
           {confirmed ? (
             <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">

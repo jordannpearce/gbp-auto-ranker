@@ -1,26 +1,34 @@
 import { getCurrentUser } from "@/lib/auth";
-import { canManageTeam } from "@/lib/access";
+import { canManageTeam, isAdmin } from "@/lib/access";
 import { redirectTo } from "@/lib/http";
-import { notifyTeamInvite } from "@/lib/notify";
+import { notifyTeamInvite, notifyWelcome } from "@/lib/notify";
 import { isStrongPassword } from "@/lib/passwords";
+import { USER_ROLES, type UserRole } from "@/lib/types";
 import { createUser, getAgency } from "@/lib/users";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user || !canManageTeam(user)) {
-    return redirectTo("/dashboard/team?error=You%20cannot%20add%20team%20members.");
+    return redirectTo("/dashboard/team?error=You%20cannot%20add%20users.");
   }
 
   const form = await request.formData();
   const name = String(form.get("name") ?? "").trim();
   const email = String(form.get("email") ?? "").trim();
   const password = String(form.get("password") ?? "");
+  const requestedRole = String(form.get("role") ?? "agency_member") as UserRole;
+  const role: UserRole =
+    isAdmin(user) && USER_ROLES.includes(requestedRole)
+      ? requestedRole
+      : "agency_member";
   const agencyId =
-    user.role === "admin"
-      ? String(form.get("agencyId") ?? user.agencyId)
-      : user.agencyId;
+    role === "admin"
+      ? ""
+      : isAdmin(user)
+        ? String(form.get("agencyId") ?? "").trim()
+        : user.agencyId;
 
-  if (!agencyId) {
+  if (role !== "admin" && !agencyId) {
     return redirectTo(
       `/dashboard/team?error=${encodeURIComponent("Choose an agency for this user.")}`,
     );
@@ -40,7 +48,7 @@ export async function POST(request: Request) {
     name,
     email,
     password,
-    role: "agency_member",
+    role,
     agencyId,
     verified: true,
   });
@@ -50,11 +58,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const agency = await getAgency(agencyId);
-  await notifyTeamInvite({
-    user: created.user,
-    agencyName: agency?.name || "your agency",
-    invitedBy: user.name,
-  });
+  if (role === "admin") {
+    await notifyWelcome(created.user);
+  } else {
+    const agency = await getAgency(agencyId);
+    await notifyTeamInvite({
+      user: created.user,
+      agencyName: agency?.name || "your agency",
+      invitedBy: user.name,
+    });
+  }
   return redirectTo("/dashboard/team?saved=1");
 }

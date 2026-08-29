@@ -303,6 +303,7 @@ export async function createAgency(input: {
   ownerName: string;
   email: string;
   password: string;
+  verified?: boolean;
 }) {
   await ensureAccounts();
   const email = input.email.trim().toLowerCase();
@@ -319,7 +320,7 @@ export async function createAgency(input: {
     passwordHash: await hashPassword(input.password),
     role: "agency_owner",
     agencyId,
-    ...confirmFields(false, now),
+    ...confirmFields(input.verified === true, now),
   };
   const agency: Agency = {
     id: agencyId,

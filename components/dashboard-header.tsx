@@ -20,7 +20,10 @@ export function DashboardHeader({
     links.push({ href: "/dashboard/emails", label: "Emails" });
   }
   if (canManageTeam(user) || user.agencyId) {
-    links.push({ href: "/dashboard/team", label: "Team" });
+    links.push({
+      href: "/dashboard/team",
+      label: isAdmin(user) ? "Users" : "Team",
+    });
   }
 
   return (
@@ -48,7 +51,7 @@ export function DashboardHeader({
             </Link>
           ))}
           <Link
-            href={isAdmin(user) ? "/get-started" : "/dashboard/clients/new"}
+            href="/dashboard/clients/new"
             className={cn(buttonVariants({ variant: "outline" }), "h-9 px-3")}
           >
             New client

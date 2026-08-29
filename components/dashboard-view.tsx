@@ -135,9 +135,22 @@ export function DashboardView({
           </p>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
             {customers.length === 0
-              ? "New campaigns from the intake form will show up here with their keywords, Maps link, and contact details."
+              ? isAdmin
+                ? "Add a customer yourself, or wait for public intake and agency-added clients."
+                : "Add a client to start ranking their Google Business Profile."
               : "Try another keyword, business name, or clear the status filter."}
           </p>
+          {customers.length === 0 ? (
+            <Link
+              href="/dashboard/clients/new"
+              className={cn(
+                buttonVariants(),
+                "mt-5 inline-flex h-10 px-4 font-semibold brand-gradient text-white",
+              )}
+            >
+              Add a client
+            </Link>
+          ) : null}
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border bg-white">

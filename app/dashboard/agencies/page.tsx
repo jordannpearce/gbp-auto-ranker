@@ -28,18 +28,28 @@ export default async function AgenciesPage() {
     <div className="flex min-h-full flex-1 flex-col bg-surface">
       <DashboardHeader user={user} agencyName={agency?.name} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-charcoal">
-          Agencies
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-          SEO agencies white-label GBP Auto Ranker. Open an agency to assign
-          business customers to their user accounts.
-        </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-charcoal">
+              Agencies
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Add an agency yourself, or open one to assign customers and see
+              their users.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/agencies/new"
+            className="inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-semibold text-white brand-gradient"
+          >
+            Add agency
+          </Link>
+        </div>
         <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-white">
           {agencies.length === 0 ? (
             <p className="px-5 py-10 text-sm text-muted-foreground">
-              No agencies yet. Owners create their own accounts from the
-              public signup page.
+              No agencies yet. Add one here, or they can still sign up
+              themselves from the public signup page.
             </p>
           ) : (
             <>

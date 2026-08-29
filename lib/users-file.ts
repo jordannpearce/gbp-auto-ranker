@@ -338,6 +338,7 @@ export async function createAgency(input: {
   ownerName: string;
   email: string;
   password: string;
+  verified?: boolean;
 }) {
   return withLock(async () => {
     await ensureAccounts();
@@ -357,7 +358,7 @@ export async function createAgency(input: {
       passwordHash: await hashPassword(input.password),
       role: "agency_owner",
       agencyId,
-      ...confirmFields(false, now),
+      ...confirmFields(input.verified === true, now),
     };
     const agency: Agency = {
       id: agencyId,
