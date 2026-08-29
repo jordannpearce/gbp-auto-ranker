@@ -1,16 +1,35 @@
 import { Resend } from "resend";
 import { appendEmailLog } from "@/lib/email-log";
+import { getEmailSettings } from "@/lib/settings";
 import type { EmailKind } from "@/lib/types";
 
-export function isEmailConfigured() {
-  return Boolean(process.env.RESEND_API_KEY);
+export async function getMailConfig() {
+  const settings = await getEmailSettings();
+  const apiKey = settings.apiKey || process.env.RESEND_API_KEY || "";
+  const fromName = settings.fromName || "GBP Auto Ranker";
+  const fromEmail =
+    settings.fromEmail ||
+    process.env.RESEND_FROM?.replace(/^.*<([^>]+)>.*$/, "$1").trim() ||
+    "";
+  const from = fromEmail
+    ? `${fromName} <${fromEmail}>`
+    : process.env.RESEND_FROM?.trim() || "";
+  return {
+    apiKey,
+    fromName,
+    fromEmail,
+    from,
+    replyTo: settings.replyTo,
+  };
 }
 
-export function fromAddress() {
-  return (
-    process.env.RESEND_FROM?.trim() ||
-    "GBP Auto Ranker <beth.t@example.com>"
-  );
+export async function isEmailConfigured() {
+  return Boolean((await getMailConfig()).apiKey);
+}
+
+export async function fromAddress() {
+  const config = await getMailConfig();
+  return config.from || "GBP Auto Ranker <hello@gbpautoranker.com>";
 }
 
 export function appBaseUrl() {
@@ -50,19 +69,21 @@ export async function sendEmail(input: {
     return { delivered: false, status: "failed", error: "No recipient." };
   }
 
+  const config = await getMailConfig();
   let status: SendEmailResult["status"] = "logged";
   let error: string | undefined;
   let resendId: string | undefined;
 
-  if (process.env.RESEND_API_KEY) {
+  if (config.apiKey && config.from) {
     try {
-      const resend = new Resend(process.env.RESEND_API_KEY);
+      const resend = new Resend(config.apiKey);
       const { data, error: sendError } = await resend.emails.send({
-        from: fromAddress(),
+        from: config.from,
         to: recipients,
         subject: input.subject,
         html: input.html,
         text: input.text,
+        replyTo: config.replyTo || undefined,
       });
       if (sendError) {
         status = "failed";
@@ -79,6 +100,10 @@ export async function sendEmail(input: {
     console.info(
       `[mail:${input.kind}] ${input.subject} -> ${recipients.join(", ")}`,
     );
+    if (config.apiKey && !config.from) {
+      error = "Add a from email in Email settings before sending.";
+      status = "failed";
+    }
   }
 
   await appendEmailLog({

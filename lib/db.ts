@@ -66,6 +66,19 @@ CREATE TABLE IF NOT EXISTS email_logs (
   resend_id TEXT
 );
 
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS email_templates (
+  kind TEXT PRIMARY KEY,
+  subject TEXT NOT NULL,
+  heading TEXT NOT NULL,
+  body TEXT NOT NULL,
+  cta_label TEXT NOT NULL DEFAULT ''
+);
+
 CREATE INDEX IF NOT EXISTS users_email_idx ON users (email);
 CREATE INDEX IF NOT EXISTS users_agency_idx ON users (agency_id);
 CREATE INDEX IF NOT EXISTS customers_agency_idx ON customers (agency_id);

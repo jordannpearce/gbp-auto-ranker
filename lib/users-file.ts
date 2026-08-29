@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { hashPassword } from "@/lib/passwords";
+import { DEMO_AGENCY_IDS, DEMO_USER_IDS } from "@/lib/demo-ids";
 import {
   DEMO_ADMIN_EMAIL,
   PRIMARY_ADMIN_EMAIL,
@@ -138,7 +139,6 @@ async function ensureAccounts() {
   } catch {
     const now = new Date().toISOString();
     const adminHash = await hashPassword(PRIMARY_ADMIN_PASSWORD);
-    const agencyHash = await hashPassword("Agency1234!");
     const verified = confirmFields(true, now);
     const users: User[] = [
       {
@@ -151,41 +151,29 @@ async function ensureAccounts() {
         agencyId: "",
         ...verified,
       },
-      {
-        id: "user_maya",
-        createdAt: now,
-        name: "Maya Chen",
-        email: "maya@northstarlocal.com",
-        passwordHash: agencyHash,
-        role: "agency_owner",
-        agencyId: "agency_northstar",
-        ...verified,
-      },
-      {
-        id: "user_leo",
-        createdAt: now,
-        name: "Leo Hart",
-        email: "leo@northstarlocal.com",
-        passwordHash: agencyHash,
-        role: "agency_member",
-        agencyId: "agency_northstar",
-        ...verified,
-      },
-    ];
-    const agencies: Agency[] = [
-      {
-        id: "agency_northstar",
-        createdAt: now,
-        name: "North Star Local",
-        website: "https://northstarlocal.com",
-        ownerUserId: "user_maya",
-      },
     ];
     await writeJson(USERS_FILE, users);
-    await writeJson(AGENCIES_FILE, agencies);
+    await writeJson(AGENCIES_FILE, []);
     await writeJson(RESETS_FILE, []);
   }
   await migratePrimaryAdmin();
+  await purgeDemoAccounts();
+}
+
+async function purgeDemoAccounts() {
+  const users = (await readJson<Partial<User>[]>(USERS_FILE, []))
+    .map((item) => normalizeUser(item))
+    .filter((item): item is User => Boolean(item))
+    .filter(
+      (user) =>
+        !DEMO_USER_IDS.includes(user.id) &&
+        !DEMO_AGENCY_IDS.includes(user.agencyId),
+    );
+  const agencies = (await readJson<Agency[]>(AGENCIES_FILE, [])).filter(
+    (agency) => !DEMO_AGENCY_IDS.includes(agency.id),
+  );
+  await writeJson(USERS_FILE, users);
+  await writeJson(AGENCIES_FILE, agencies);
 }
 
 async function readUsers() {

@@ -80,7 +80,7 @@ export function IntakeForm({
             id="businessName"
             name="businessName"
             required
-            placeholder="Harbor Street Dental"
+            placeholder="Your business name"
           />
         </Field>
         <Field label="Category" htmlFor="category" required>
@@ -100,7 +100,7 @@ export function IntakeForm({
             id="address"
             name="address"
             autoComplete="street-address"
-            placeholder="418 Harbor Street"
+            placeholder="123 Main Street"
           />
         </Field>
         <Field label="City" htmlFor="city" required>
@@ -109,7 +109,7 @@ export function IntakeForm({
             name="city"
             required
             autoComplete="address-level2"
-            placeholder="Sausalito"
+            placeholder="Austin"
           />
         </Field>
         <Field label="State" htmlFor="state" required>

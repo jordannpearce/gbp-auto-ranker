@@ -30,7 +30,7 @@ export default async function SignupPage({
             name="agencyName"
             required
             className="mt-2"
-            placeholder="North Star Local"
+            placeholder="Your agency"
           />
         </div>
         <div>
@@ -51,7 +51,7 @@ export default async function SignupPage({
             required
             autoComplete="name"
             className="mt-2"
-            placeholder="Maya Chen"
+            placeholder="Your name"
           />
         </div>
         <div>

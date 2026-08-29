@@ -36,6 +36,13 @@ export default async function AgenciesPage() {
           business customers to their user accounts.
         </p>
         <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-white">
+          {agencies.length === 0 ? (
+            <p className="px-5 py-10 text-sm text-muted-foreground">
+              No agencies yet. Owners create their own accounts from the
+              public signup page.
+            </p>
+          ) : (
+            <>
           <div className="hidden grid-cols-[1.4fr_1fr_auto_auto_auto] gap-4 border-b border-border bg-surface px-5 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase md:grid">
             <span>Agency</span>
             <span>Owner</span>
@@ -75,6 +82,8 @@ export default async function AgenciesPage() {
               );
             })}
           </ul>
+            </>
+          )}
         </div>
       </main>
     </div>

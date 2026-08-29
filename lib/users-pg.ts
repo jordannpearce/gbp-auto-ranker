@@ -1,5 +1,6 @@
 import { hashPassword } from "@/lib/passwords";
 import { iso, query, withTransaction } from "@/lib/db";
+import { DEMO_AGENCY_IDS, DEMO_CUSTOMER_IDS, DEMO_USER_IDS } from "@/lib/demo-ids";
 import {
   DEMO_ADMIN_EMAIL,
   PRIMARY_ADMIN_EMAIL,
@@ -134,80 +135,45 @@ async function ensureAccounts() {
   );
   if (Number(rows[0]?.count || 0) > 0) {
     await migratePrimaryAdmin();
+    await purgeDemoAccounts();
     return;
   }
 
   const now = new Date().toISOString();
   const adminHash = await hashPassword(PRIMARY_ADMIN_PASSWORD);
-  const agencyHash = await hashPassword("Agency1234!");
   const verified = confirmFields(true, now);
-  const users: User[] = [
-    {
-      id: PRIMARY_ADMIN_ID,
-      createdAt: now,
-      name: PRIMARY_ADMIN_NAME,
-      email: PRIMARY_ADMIN_EMAIL,
-      passwordHash: adminHash,
-      role: "admin",
-      agencyId: "",
-      ...verified,
-    },
-    {
-      id: "user_maya",
-      createdAt: now,
-      name: "Maya Chen",
-      email: "maya@northstarlocal.com",
-      passwordHash: agencyHash,
-      role: "agency_owner",
-      agencyId: "agency_northstar",
-      ...verified,
-    },
-    {
-      id: "user_leo",
-      createdAt: now,
-      name: "Leo Hart",
-      email: "leo@northstarlocal.com",
-      passwordHash: agencyHash,
-      role: "agency_member",
-      agencyId: "agency_northstar",
-      ...verified,
-    },
-  ];
-  await withTransaction(async (client) => {
-    for (const user of users) {
-      await client.query(
-        `INSERT INTO users (
-          id, created_at, name, email, password_hash, role, agency_id,
-          email_verified_at, confirm_token, confirm_expires_at
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-        ON CONFLICT (id) DO NOTHING`,
-        [
-          user.id,
-          user.createdAt,
-          user.name,
-          user.email,
-          user.passwordHash,
-          user.role,
-          user.agencyId,
-          user.emailVerifiedAt,
-          user.confirmToken,
-          user.confirmExpiresAt,
-        ],
-      );
-    }
-    await client.query(
-      `INSERT INTO agencies (id, created_at, name, website, owner_user_id)
-       VALUES ($1,$2,$3,$4,$5)
-       ON CONFLICT (id) DO NOTHING`,
-      [
-        "agency_northstar",
-        now,
-        "North Star Local",
-        "https://northstarlocal.com",
-        "user_maya",
-      ],
-    );
-  });
+  await query(
+    `INSERT INTO users (
+      id, created_at, name, email, password_hash, role, agency_id,
+      email_verified_at, confirm_token, confirm_expires_at
+    ) VALUES ($1,$2,$3,$4,$5,'admin','',$6,$7,$8)
+    ON CONFLICT (id) DO NOTHING`,
+    [
+      PRIMARY_ADMIN_ID,
+      now,
+      PRIMARY_ADMIN_NAME,
+      PRIMARY_ADMIN_EMAIL,
+      adminHash,
+      verified.emailVerifiedAt,
+      verified.confirmToken,
+      verified.confirmExpiresAt,
+    ],
+  );
+  await purgeDemoAccounts();
+}
+
+async function purgeDemoAccounts() {
+  await query(
+    "DELETE FROM customers WHERE id = ANY($1::text[]) OR agency_id = ANY($2::text[])",
+    [DEMO_CUSTOMER_IDS, DEMO_AGENCY_IDS],
+  );
+  await query(
+    "DELETE FROM users WHERE id = ANY($1::text[]) OR agency_id = ANY($2::text[])",
+    [DEMO_USER_IDS, DEMO_AGENCY_IDS],
+  );
+  await query("DELETE FROM agencies WHERE id = ANY($1::text[])", [
+    DEMO_AGENCY_IDS,
+  ]);
 }
 
 export async function listUsers() {

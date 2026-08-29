@@ -1,4 +1,5 @@
 import { iso, query } from "@/lib/db";
+import { DEMO_AGENCY_IDS, DEMO_CUSTOMER_IDS } from "@/lib/demo-ids";
 import type { Customer, CustomerInput, CustomerUpdate } from "@/lib/types";
 
 function mapCustomer(row: Record<string, unknown>): Customer {
@@ -30,110 +31,42 @@ function mapCustomer(row: Record<string, unknown>): Customer {
   };
 }
 
-function seedCustomers(): Customer[] {
-  const now = new Date().toISOString();
-  return [
-    {
-      id: "cust_harbor_dental",
-      createdAt: now,
-      updatedAt: now,
-      status: "active",
-      contactName: "Elena Vasquez",
-      email: "elena@harborstreetdental.com",
-      phone: "(415) 555-0142",
-      role: "Owner",
-      businessName: "Harbor Street Dental",
-      category: "Dentist",
-      address: "418 Harbor Street",
-      city: "Sausalito",
-      state: "CA",
-      zip: "94965",
-      website: "https://harborstreetdental.com",
-      googleMapsUrl: "https://maps.google.com/?cid=harbor-street-dental",
-      keywords: [
-        "dentist near me",
-        "emergency dentist Sausalito",
-        "teeth whitening",
-        "family dentist Marin",
-      ],
-      serviceArea: "Sausalito, Mill Valley, Marin City",
-      primaryGoal: "Rank in the map pack",
-      comments:
-        "We lose weekend emergency calls to a clinic two towns over. Map pack for 'emergency dentist' is the priority.",
-      referralSource: "Referral from another local owner",
-      internalNotes:
-        "Started map-pack campaign on weekday evenings and Saturday mornings.",
-      agencyId: "agency_northstar",
-      managerUserId: "user_maya",
-    },
-    {
-      id: "cust_midtown_auto",
-      createdAt: now,
-      updatedAt: now,
-      status: "reviewing",
-      contactName: "Marcus Hale",
-      email: "marcus@midtownautocare.com",
-      phone: "(512) 555-0198",
-      role: "General Manager",
-      businessName: "Midtown Auto Care",
-      category: "Auto repair shop",
-      address: "902 East 6th Street",
-      city: "Austin",
-      state: "TX",
-      zip: "78702",
-      website: "https://midtownautocare.com",
-      googleMapsUrl: "https://maps.google.com/?cid=midtown-auto-care",
-      keywords: [
-        "auto repair near me",
-        "brake service Austin",
-        "oil change East Austin",
-        "check engine light",
-      ],
-      serviceArea: "East Austin, Downtown Austin, Travis Heights",
-      primaryGoal: "More phone calls",
-      comments:
-        "Listing is claimed. Photos are current. We want calls for brakes and diagnostics, not just oil changes.",
-      referralSource: "Google search",
-      internalNotes: "",
-      agencyId: "agency_northstar",
-      managerUserId: "user_leo",
-    },
-    {
-      id: "cust_bloom_stem",
-      createdAt: now,
-      updatedAt: now,
-      status: "new",
-      contactName: "Priya Raman",
-      email: "hello@bloomandstem.co",
-      phone: "(206) 555-0174",
-      role: "Owner",
-      businessName: "Bloom & Stem",
-      category: "Florist",
-      address: "1551 15th Avenue",
-      city: "Seattle",
-      state: "WA",
-      zip: "98122",
-      website: "https://bloomandstem.co",
-      googleMapsUrl: "https://maps.google.com/?cid=bloom-and-stem",
-      keywords: [
-        "florist near me",
-        "same day flower delivery",
-        "wedding florist Seattle",
-        "birthday bouquet",
-      ],
-      serviceArea: "Capitol Hill, Central District, downtown Seattle",
-      primaryGoal: "More direction requests",
-      comments:
-        "Walk-in traffic dropped after a new shop opened two blocks away. Same-day delivery terms matter most.",
-      referralSource: "Instagram",
-      internalNotes: "",
-      agencyId: "",
-      managerUserId: "",
-    },
-  ];
+async function purgeDemoCustomers() {
+  await query(
+    "DELETE FROM customers WHERE id = ANY($1::text[]) OR agency_id = ANY($2::text[])",
+    [DEMO_CUSTOMER_IDS, DEMO_AGENCY_IDS],
+  );
 }
 
-async function insertCustomer(customer: Customer) {
+export async function listCustomers() {
+  await purgeDemoCustomers();
+  const { rows } = await query(
+    "SELECT * FROM customers ORDER BY created_at DESC",
+  );
+  return rows.map((row) => mapCustomer(row));
+}
+
+export async function getCustomer(id: string) {
+  await purgeDemoCustomers();
+  const { rows } = await query("SELECT * FROM customers WHERE id = $1", [id]);
+  return rows[0] ? mapCustomer(rows[0]) : null;
+}
+
+export async function createCustomer(
+  input: CustomerInput,
+  extras?: { agencyId?: string; managerUserId?: string },
+) {
+  const now = new Date().toISOString();
+  const customer: Customer = {
+    ...input,
+    id: `cust_${crypto.randomUUID().slice(0, 8)}`,
+    createdAt: now,
+    updatedAt: now,
+    status: "new",
+    internalNotes: "",
+    agencyId: extras?.agencyId ?? "",
+    managerUserId: extras?.managerUserId ?? "",
+  };
   await query(
     `INSERT INTO customers (
       id, created_at, updated_at, status, contact_name, email, phone, role,
@@ -170,84 +103,6 @@ async function insertCustomer(customer: Customer) {
       customer.managerUserId,
     ],
   );
-}
-
-async function ensureCustomers() {
-  const { rows } = await query<{ count: string }>(
-    "SELECT COUNT(*)::text AS count FROM customers",
-  );
-  if (Number(rows[0]?.count || 0) > 0) return;
-  for (const customer of seedCustomers()) {
-    await query(
-      `INSERT INTO customers (
-        id, created_at, updated_at, status, contact_name, email, phone, role,
-        business_name, category, address, city, state, zip, website,
-        google_maps_url, keywords, service_area, primary_goal, comments,
-        referral_source, internal_notes, agency_id, manager_user_id
-      ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24
-      ) ON CONFLICT (id) DO NOTHING`,
-      [
-        customer.id,
-        customer.createdAt,
-        customer.updatedAt,
-        customer.status,
-        customer.contactName,
-        customer.email,
-        customer.phone,
-        customer.role,
-        customer.businessName,
-        customer.category,
-        customer.address,
-        customer.city,
-        customer.state,
-        customer.zip,
-        customer.website,
-        customer.googleMapsUrl,
-        customer.keywords,
-        customer.serviceArea,
-        customer.primaryGoal,
-        customer.comments,
-        customer.referralSource,
-        customer.internalNotes,
-        customer.agencyId,
-        customer.managerUserId,
-      ],
-    );
-  }
-}
-
-export async function listCustomers() {
-  await ensureCustomers();
-  const { rows } = await query(
-    "SELECT * FROM customers ORDER BY created_at DESC",
-  );
-  return rows.map((row) => mapCustomer(row));
-}
-
-export async function getCustomer(id: string) {
-  await ensureCustomers();
-  const { rows } = await query("SELECT * FROM customers WHERE id = $1", [id]);
-  return rows[0] ? mapCustomer(rows[0]) : null;
-}
-
-export async function createCustomer(
-  input: CustomerInput,
-  extras?: { agencyId?: string; managerUserId?: string },
-) {
-  await ensureCustomers();
-  const now = new Date().toISOString();
-  const customer: Customer = {
-    ...input,
-    id: `cust_${crypto.randomUUID().slice(0, 8)}`,
-    createdAt: now,
-    updatedAt: now,
-    status: "new",
-    internalNotes: "",
-    agencyId: extras?.agencyId ?? "",
-    managerUserId: extras?.managerUserId ?? "",
-  };
-  await insertCustomer(customer);
   return customer;
 }
 

@@ -10,6 +10,7 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 - Campaign intake: name, business details, Google Maps link, keywords, comments
 - Email/password login, forgot-password reset, and agency signup with email confirmation
 - Transactional and broadcast email through [Resend](https://resend.com): confirmations, welcome, resets, intake receipts, assignment notices, team invites, plus admin marketing/info/update emails
+- Admin Emails page to save the Resend API key, from-address, and editable templates
 - Admin dashboard: all customers, assign listings to agency users, compose emails
 - Agency dashboard: clients the agency manages, plus extra team users
 - Postgres on Railway for accounts, customers, and the email log, with JSON files as a local fallback
@@ -22,9 +23,9 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 | Agency owner | Agency clients, team roster, ability to add users and new clients. |
 | Agency user | The same client book for that agency. |
 
-Local seed includes sample agency users for development. The live admin account is created for the operator and is not shown on the public login page.
+The live admin account is created for the operator and is not shown on the public login page. Sample clients and the old demo agency are not seeded.
 
-New agency signups must confirm a work email before they can sign in. Forgot password sends a one-hour reset link through Resend. If `RESEND_API_KEY` is missing, the confirm and reset links are shown on screen and every attempted send is written to the email log.
+New agency signups must confirm a work email before they can sign in. Forgot password sends a one-hour reset link. Save a Resend API key on `/dashboard/emails` (or set `RESEND_API_KEY`). Without a key, confirm and reset links are shown on screen and every attempted send is written to the email log.
 
 ## Local development
 
@@ -43,9 +44,9 @@ Open [http://127.0.0.1:4410](http://127.0.0.1:4410).
 | `/login` | User login |
 | `/signup` | Agency account creation (confirmation email) |
 | `/dashboard` | Role-aware workspace |
-| `/dashboard/emails` | Admin email composer and send log |
+| `/dashboard/emails` | Admin Resend settings, templates, composer, and send log |
 
-Without `DATABASE_URL`, records are written to `data/*.json`. With Postgres, the same seed runs into the database on first boot: three sample businesses (two assigned to North Star Local) and the demo accounts.
+Without `DATABASE_URL`, records are written to `data/*.json`. With Postgres, the same tables are used. First boot creates the operator admin only — no sample clients or agencies.
 
 ## GitHub + Railway
 
@@ -62,7 +63,7 @@ RESEND_API_KEY=re_xxxxxxxx
 RESEND_FROM=GBP Auto Ranker <hello@your-verified-domain.com>
 ```
 
-`APP_URL` is used in confirmation, reset, and dashboard links. Verify the from-domain in Resend or stay on `beth.t@example.com` (test sends only go to your Resend account email).
+You can also paste the API key, from name, from email, and reply-to on `/dashboard/emails`. Saved values override these environment variables. `APP_URL` is used in confirmation, reset, and dashboard links. Verify the from-domain in Resend or stay on `beth.t@example.com` (test sends only go to your Resend account email).
 
 5. Add a Railway Postgres plugin to the same project. Point `DATABASE_URL` at `${{Postgres.DATABASE_URL}}` so the app uses the private hostname.
 
