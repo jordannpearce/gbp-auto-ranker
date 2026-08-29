@@ -8,7 +8,8 @@ const links = [
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#what-we-run", label: "What we run" },
   { href: "/get-started", label: "Start a campaign" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/signup", label: "Agency signup" },
+  { href: "/login", label: "Log in" },
 ];
 
 export function SiteHeader() {

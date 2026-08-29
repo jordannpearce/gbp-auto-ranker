@@ -1,62 +1,60 @@
 import { NextResponse } from "next/server";
 import {
   COOKIE_NAME,
-  checkPassword,
+  createSessionToken,
   sessionCookieOptions,
-  sessionToken,
-} from "@/lib/auth";
+} from "@/lib/session";
 import { redirectTo } from "@/lib/http";
+import { verifyPassword } from "@/lib/passwords";
+import { getUserByEmail } from "@/lib/users";
 
 function safeNext(value: string) {
-  return value.startsWith("/") && !value.startsWith("//")
-    ? value
-    : "/dashboard";
-}
-
-async function readLogin(request: Request) {
-  const contentType = request.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    const body = (await request.json().catch(() => null)) as {
-      password?: string;
-      next?: string;
-    } | null;
-    return {
-      password: body?.password?.trim() ?? "",
-      next: safeNext(body?.next || "/dashboard"),
-      viaForm: false,
-    };
-  }
-
-  const form = await request.formData().catch(() => null);
-  return {
-    password: String(form?.get("password") ?? "").trim(),
-    next: safeNext(String(form?.get("next") ?? "/dashboard")),
-    viaForm: true,
-  };
+  return value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
 }
 
 export async function POST(request: Request) {
-  const { password, next, viaForm } = await readLogin(request);
+  const contentType = request.headers.get("content-type") || "";
+  const viaForm = contentType.includes("form");
+  let email = "";
+  let password = "";
+  let next = "/dashboard";
 
-  if (!checkPassword(password)) {
+  if (viaForm) {
+    const form = await request.formData();
+    email = String(form.get("email") ?? "").trim();
+    password = String(form.get("password") ?? "");
+    next = safeNext(String(form.get("next") ?? "/dashboard"));
+  } else {
+    const body = (await request.json().catch(() => null)) as {
+      email?: string;
+      password?: string;
+      next?: string;
+    } | null;
+    email = body?.email?.trim() ?? "";
+    password = body?.password ?? "";
+    next = safeNext(body?.next || "/dashboard");
+  }
+
+  const user = await getUserByEmail(email);
+  const ok = user ? await verifyPassword(password, user.passwordHash) : false;
+  if (!user || !ok) {
     if (viaForm) {
       return redirectTo(
-        `/dashboard/login?error=1&next=${encodeURIComponent(next)}`,
+        `/login?error=1&next=${encodeURIComponent(next)}`,
       );
     }
     return NextResponse.json(
-      { error: "That password does not match." },
+      { error: "That email or password does not match." },
       { status: 401 },
     );
   }
 
-  const token = await sessionToken();
+  const token = await createSessionToken(user.id);
   if (viaForm) {
     const response = redirectTo(next);
     response.cookies.set(COOKIE_NAME, token, sessionCookieOptions());
     return response;
   }
-
   const response = NextResponse.json({ ok: true });
   response.cookies.set(COOKIE_NAME, token, sessionCookieOptions());
   return response;

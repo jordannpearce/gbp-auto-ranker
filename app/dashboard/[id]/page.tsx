@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CustomerDetail } from "@/components/customer-detail";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { canSeeCustomer } from "@/lib/access";
+import { loadDashboardUser } from "@/lib/dashboard";
 import { getCustomer } from "@/lib/store";
+import { getAgency, listAgencies, listUsers, toPublicUser } from "@/lib/users";
 
 export const dynamic = "force-dynamic";
 
@@ -25,17 +28,32 @@ export default async function CustomerPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; saved?: string }>;
 }) {
+  const { user, agency } = await loadDashboardUser();
   const { id } = await params;
   const { error, saved } = await searchParams;
   const customer = await getCustomer(id);
-  if (!customer) notFound();
+  if (!customer || !canSeeCustomer(user, customer)) notFound();
+
+  const [agencies, users] = await Promise.all([listAgencies(), listUsers()]);
+  const managers = users
+    .filter((item) => item.role !== "admin")
+    .map(toPublicUser);
+  const assignedAgency = customer.agencyId
+    ? await getAgency(customer.agencyId)
+    : null;
+  const manager = users.find((item) => item.id === customer.managerUserId);
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-surface">
-      <DashboardHeader />
+      <DashboardHeader user={user} agencyName={agency?.name} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
         <CustomerDetail
           customer={customer}
+          user={user}
+          agencies={agencies}
+          managers={managers}
+          agencyName={assignedAgency?.name}
+          managerName={manager?.name}
           error={error}
           saved={saved === "1"}
         />

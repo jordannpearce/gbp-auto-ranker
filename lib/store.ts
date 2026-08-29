@@ -8,6 +8,36 @@ const DATA_FILE = path.join(DATA_DIR, "customers.json");
 
 let writeChain: Promise<unknown> = Promise.resolve();
 
+function normalizeCustomer(raw: Partial<Customer>): Customer | null {
+  if (!raw?.id || !raw.businessName) return null;
+  return {
+    id: raw.id,
+    createdAt: raw.createdAt || new Date().toISOString(),
+    updatedAt: raw.updatedAt || raw.createdAt || new Date().toISOString(),
+    status: raw.status || "new",
+    contactName: raw.contactName || "",
+    email: raw.email || "",
+    phone: raw.phone || "",
+    role: raw.role || "",
+    businessName: raw.businessName,
+    category: raw.category || "",
+    address: raw.address || "",
+    city: raw.city || "",
+    state: raw.state || "",
+    zip: raw.zip || "",
+    website: raw.website || "",
+    googleMapsUrl: raw.googleMapsUrl || "",
+    keywords: Array.isArray(raw.keywords) ? raw.keywords : [],
+    serviceArea: raw.serviceArea || "",
+    primaryGoal: raw.primaryGoal || "",
+    comments: raw.comments || "",
+    referralSource: raw.referralSource || "",
+    internalNotes: raw.internalNotes || "",
+    agencyId: raw.agencyId || "",
+    managerUserId: raw.managerUserId || "",
+  };
+}
+
 function seedCustomers(): Customer[] {
   const now = new Date().toISOString();
   return [
@@ -39,7 +69,10 @@ function seedCustomers(): Customer[] {
       comments:
         "We lose weekend emergency calls to a clinic two towns over. Map pack for 'emergency dentist' is the priority.",
       referralSource: "Referral from another local owner",
-      internalNotes: "Started map-pack campaign on weekday evenings and Saturday mornings.",
+      internalNotes:
+        "Started map-pack campaign on weekday evenings and Saturday mornings.",
+      agencyId: "agency_northstar",
+      managerUserId: "user_maya",
     },
     {
       id: "cust_midtown_auto",
@@ -70,6 +103,8 @@ function seedCustomers(): Customer[] {
         "Listing is claimed. Photos are current. We want calls for brakes and diagnostics, not just oil changes.",
       referralSource: "Google search",
       internalNotes: "",
+      agencyId: "agency_northstar",
+      managerUserId: "user_leo",
     },
     {
       id: "cust_bloom_stem",
@@ -100,6 +135,8 @@ function seedCustomers(): Customer[] {
         "Walk-in traffic dropped after a new shop opened two blocks away. Same-day delivery terms matter most.",
       referralSource: "Instagram",
       internalNotes: "",
+      agencyId: "",
+      managerUserId: "",
     },
   ];
 }
@@ -121,8 +158,24 @@ async function readCustomers(): Promise<Customer[]> {
   await ensureStore();
   const raw = await fs.readFile(DATA_FILE, "utf8");
   try {
-    const parsed = JSON.parse(raw) as Customer[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed = JSON.parse(raw) as Partial<Customer>[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => {
+        const customer = normalizeCustomer(item);
+        if (!customer) return null;
+        if (
+          !customer.agencyId &&
+          (customer.id === "cust_harbor_dental" ||
+            customer.id === "cust_midtown_auto")
+        ) {
+          customer.agencyId = "agency_northstar";
+          customer.managerUserId =
+            customer.id === "cust_midtown_auto" ? "user_leo" : "user_maya";
+        }
+        return customer;
+      })
+      .filter((item): item is Customer => Boolean(item));
   } catch {
     return [];
   }
@@ -154,7 +207,10 @@ export async function getCustomer(id: string) {
   return customers.find((customer) => customer.id === id) ?? null;
 }
 
-export async function createCustomer(input: CustomerInput) {
+export async function createCustomer(
+  input: CustomerInput,
+  extras?: { agencyId?: string; managerUserId?: string },
+) {
   return withLock(async () => {
     const customers = await readCustomers();
     const now = new Date().toISOString();
@@ -165,6 +221,8 @@ export async function createCustomer(input: CustomerInput) {
       updatedAt: now,
       status: "new",
       internalNotes: "",
+      agencyId: extras?.agencyId ?? "",
+      managerUserId: extras?.managerUserId ?? "",
     };
     customers.unshift(customer);
     await writeCustomers(customers);
@@ -197,4 +255,3 @@ export async function deleteCustomer(id: string) {
     return true;
   });
 }
-

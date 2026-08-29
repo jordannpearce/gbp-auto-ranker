@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { formatLocation, STATUS_LABELS } from "@/lib/customers";
 import { formatDate } from "@/lib/format";
 import { customerStats } from "@/lib/stats";
-import type { CampaignStatus, Customer } from "@/lib/types";
+import type { Agency, CampaignStatus, Customer, PublicUser } from "@/lib/types";
 import { CAMPAIGN_STATUSES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -21,12 +21,20 @@ type DashboardViewProps = {
   customers: Customer[];
   query: string;
   status: CampaignStatus | "all";
+  scope: "all" | "mine" | "unassigned";
+  isAdmin: boolean;
+  agencies: Agency[];
+  users: PublicUser[];
 };
 
 export function DashboardView({
   customers,
   query,
   status,
+  scope,
+  isAdmin,
+  agencies,
+  users,
 }: DashboardViewProps) {
   const stats = customerStats(customers);
   const needle = query.trim().toLowerCase();
@@ -52,7 +60,7 @@ export function DashboardView({
         <StatCard
           label="Customers"
           value={stats.total}
-          hint="All campaigns in the book"
+          hint={isAdmin ? "All campaigns in the book" : "Clients on your roster"}
           icon={Building2}
         />
         <StatCard
@@ -92,7 +100,7 @@ export function DashboardView({
         <select
           name="status"
           defaultValue={status}
-          className={cn(selectClassName, "sm:w-48")}
+          className={cn(selectClassName, "sm:w-44")}
         >
           <option value="all">All statuses</option>
           {CAMPAIGN_STATUSES.map((value) => (
@@ -100,6 +108,15 @@ export function DashboardView({
               {STATUS_LABELS[value]}
             </option>
           ))}
+        </select>
+        <select
+          name="scope"
+          defaultValue={scope}
+          className={cn(selectClassName, "sm:w-48")}
+        >
+          <option value="all">{isAdmin ? "All assignments" : "All agency clients"}</option>
+          <option value="mine">Assigned to me</option>
+          {isAdmin ? <option value="unassigned">Unassigned</option> : null}
         </select>
         <button
           type="submit"
@@ -145,6 +162,11 @@ export function DashboardView({
                     <p className="text-sm text-muted-foreground">
                       {customer.category}
                       {customer.city ? ` · ${formatLocation(customer)}` : ""}
+                      {isAdmin
+                        ? ` · ${agencies.find((agency) => agency.id === customer.agencyId)?.name || "Unassigned"}`
+                        : customer.managerUserId
+                          ? ` · ${users.find((item) => item.id === customer.managerUserId)?.name || "Teammate"}`
+                          : ""}
                     </p>
                   </div>
                   <div>

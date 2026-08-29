@@ -1,15 +1,33 @@
 # GBP Auto Ranker
 
-Website and operator dashboard for **GBP Auto Ranker** — a Google Business Profile ranking service. The public site explains the offer, collects campaign intake, and stores every submission so you can manage listings, keywords, and status from one dashboard.
+Website and operator dashboard for **GBP Auto Ranker** — a Google Business Profile ranking service. The public site collects campaign intake. Admins and SEO agencies sign in to manage clients, keywords, and team seats.
 
 GBP Auto Ranker runs real searches, clicks, and engagement signals against a Google Business Profile so the listing climbs the map pack for the keywords that bring in customers.
 
 ## What’s included
 
 - Marketing site with the brand logo and blue/black/white palette
-- Campaign intake form: name, business details, Google Maps link, keywords, comments
-- Customer dashboard: search, status, keyword lists, Maps link, internal notes
+- Campaign intake: name, business details, Google Maps link, keywords, comments
+- Email/password login, forgot-password reset, and agency signup
+- Admin dashboard: all customers, assign listings to agency users
+- Agency dashboard: clients the agency manages, plus extra team users
 - File-backed storage so you can host on Railway without a separate database
+
+## Accounts
+
+| Role | What they see |
+| --- | --- |
+| Admin | Every customer. Assigns businesses to an SEO agency and to a specific agency user. |
+| Agency owner | Agency clients, team roster, ability to add users and new clients. |
+| Agency user | The same client book for that agency. |
+
+Demo logins (seeded on first run):
+
+- Admin: `admin@gbpautoranker.com` / `Admin1234!`
+- Agency owner: `maya@northstarlocal.com` / `Agency1234!`
+- Agency user: `leo@northstarlocal.com` / `Agency1234!`
+
+Change those passwords after you go live. Forgot password creates a one-hour reset link. This host does not send email, so the link is shown on the confirmation page.
 
 ## Local development
 
@@ -24,12 +42,12 @@ Open [http://127.0.0.1:4410](http://127.0.0.1:4410).
 | Page | Purpose |
 | --- | --- |
 | `/` | Marketing site |
-| `/get-started` | Campaign intake |
-| `/dashboard` | Operator dashboard |
+| `/get-started` | Public campaign intake |
+| `/login` | User login |
+| `/signup` | Agency account creation |
+| `/dashboard` | Role-aware workspace |
 
-The dashboard password defaults to `gbp-admin`. Change it with `DASHBOARD_PASSWORD`.
-
-Customer records are written to `data/customers.json`. The first run seeds three sample businesses so the dashboard is not empty.
+Records are written to `data/*.json`. The first run seeds three sample businesses (two already assigned to North Star Local) and the demo accounts.
 
 ## GitHub + Railway
 
@@ -39,14 +57,13 @@ Customer records are written to `data/customers.json`. The first run seeds three
 4. Set these variables on the Railway service:
 
 ```
-DASHBOARD_PASSWORD=choose-a-strong-password
 DASHBOARD_SECRET=choose-a-long-random-string
 DATA_DIR=/data
 ```
 
-5. Add a Railway Volume mounted at `/data` so customer records survive redeploys.
+5. Add a Railway Volume mounted at `/data` so accounts and customers survive redeploys.
 
-Without a volume, the filesystem is ephemeral and the customer list resets when the service is rebuilt.
+Without a volume, the filesystem is ephemeral and data resets when the service is rebuilt.
 
 Nixpacks is configured in `railway.json`. A `Dockerfile` is also included if you prefer image-based deploys.
 

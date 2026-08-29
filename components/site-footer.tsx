@@ -22,8 +22,11 @@ export function SiteFooter() {
           <Link href="/get-started" className="hover:text-primary">
             Start a campaign
           </Link>
-          <Link href="/dashboard" className="hover:text-primary">
-            Customer dashboard
+          <Link href="/login" className="hover:text-primary">
+            Log in
+          </Link>
+          <Link href="/signup" className="hover:text-primary">
+            Agency signup
           </Link>
           <Link href="/#how-it-works" className="hover:text-primary">
             How it works

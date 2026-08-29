@@ -5,9 +5,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { PRIMARY_GOALS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export function IntakeForm({ error }: { error?: string }) {
+export function IntakeForm({
+  error,
+  returnTo,
+}: {
+  error?: string;
+  returnTo?: string;
+}) {
   return (
     <form action="/api/customers" method="post" className="space-y-10">
+      {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
       <FormSection
         eyebrow="Contact"
         title="Who should we work with?"

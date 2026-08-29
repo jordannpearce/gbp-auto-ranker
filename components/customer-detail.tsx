@@ -12,17 +12,29 @@ import { StatusBadge } from "@/components/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { isAdmin } from "@/lib/access";
 import { formatLocation, STATUS_LABELS } from "@/lib/customers";
 import { formatDateTime } from "@/lib/format";
+import type { Agency, PublicUser } from "@/lib/types";
 import { CAMPAIGN_STATUSES, type Customer } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function CustomerDetail({
   customer,
+  user,
+  agencies,
+  managers,
+  agencyName,
+  managerName,
   error,
   saved,
 }: {
   customer: Customer;
+  user: PublicUser;
+  agencies: Agency[];
+  managers: PublicUser[];
+  agencyName?: string;
+  managerName?: string;
   error?: string;
   saved?: boolean;
 }) {
@@ -35,7 +47,7 @@ export function CustomerDetail({
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             <ArrowLeft className="size-4" />
-            All customers
+            {isAdmin(user) ? "All customers" : "All clients"}
           </Link>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-charcoal">
             {customer.businessName}
@@ -147,6 +159,50 @@ export function CustomerDetail({
                   </select>
                 </div>
               </div>
+              {isAdmin(user) ? (
+                <>
+                  <div>
+                    <Label htmlFor="agencyId">Assign to agency</Label>
+                    <select
+                      id="agencyId"
+                      name="agencyId"
+                      form="campaign-form"
+                      defaultValue={customer.agencyId}
+                      className={cn(selectClassName, "mt-2")}
+                    >
+                      <option value="">Unassigned</option>
+                      {agencies.map((agency) => (
+                        <option key={agency.id} value={agency.id}>
+                          {agency.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="managerUserId">Agency account manager</Label>
+                    <select
+                      id="managerUserId"
+                      name="managerUserId"
+                      form="campaign-form"
+                      defaultValue={customer.managerUserId}
+                      className={cn(selectClassName, "mt-2")}
+                    >
+                      <option value="">Agency-wide</option>
+                      {managers.map((manager) => (
+                        <option key={manager.id} value={manager.id}>
+                          {manager.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {agencyName
+                    ? `Managed by ${agencyName}${managerName ? ` · ${managerName}` : ""}`
+                    : "Assigned to your agency."}
+                </p>
+              )}
               <div>
                 <Label htmlFor="internalNotes">Internal notes</Label>
                 <Textarea
@@ -219,16 +275,21 @@ export function CustomerDetail({
             </dl>
           </Panel>
 
-          <form action={`/api/customers/${customer.id}`} method="post">
-            <input type="hidden" name="intent" value="delete" />
-            <button
-              type="submit"
-              className={cn(buttonVariants({ variant: "destructive" }), "h-10 w-full")}
-            >
-              <Trash2 className="size-4" />
-              Remove customer
-            </button>
-          </form>
+          {isAdmin(user) ? (
+            <form action={`/api/customers/${customer.id}`} method="post">
+              <input type="hidden" name="intent" value="delete" />
+              <button
+                type="submit"
+                className={cn(
+                  buttonVariants({ variant: "destructive" }),
+                  "h-10 w-full",
+                )}
+              >
+                <Trash2 className="size-4" />
+                Remove customer
+              </button>
+            </form>
+          ) : null}
         </div>
       </div>
     </div>

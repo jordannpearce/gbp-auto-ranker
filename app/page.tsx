@@ -60,7 +60,7 @@ const fit = [
   "Brick-and-mortar shops that live or die by the map pack",
   "Service businesses that want calls from a specific city or neighborhood",
   "Owners who already claimed their Google Business Profile",
-  "Teams that can name the 5–15 keywords customers actually type",
+  "SEO agencies that want to white-label ranking for their client roster",
 ];
 
 export default function HomePage() {
@@ -96,13 +96,13 @@ export default function HomePage() {
                   <ArrowRight className="size-4" />
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/login"
                   className={cn(
                     buttonVariants({ variant: "outline" }),
                     "h-12 px-6 text-base font-semibold",
                   )}
                 >
-                  Open dashboard
+                  Log in
                 </Link>
               </div>
               <p className="mt-5 text-sm text-muted-foreground">
@@ -239,15 +239,26 @@ export default function HomePage() {
                   </span>
                 ))}
               </div>
-              <Link
-                href="/get-started"
-                className={cn(
-                  buttonVariants(),
-                  "mt-8 h-11 px-5 font-semibold brand-gradient text-white",
-                )}
-              >
-                Fill out the campaign form
-              </Link>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/get-started"
+                  className={cn(
+                    buttonVariants(),
+                    "h-11 px-5 font-semibold brand-gradient text-white",
+                  )}
+                >
+                  Fill out the campaign form
+                </Link>
+                <Link
+                  href="/signup"
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "h-11 px-5 font-semibold",
+                  )}
+                >
+                  Agency signup
+                </Link>
+              </div>
             </div>
           </div>
         </section>

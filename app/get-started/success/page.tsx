@@ -10,13 +10,7 @@ export const metadata: Metadata = {
   title: "Campaign received",
 };
 
-export default async function SuccessPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ id?: string }>;
-}) {
-  const { id } = await searchParams;
-
+export default async function SuccessPage() {
   return (
     <div className="flex min-h-full flex-1 flex-col bg-white">
       <SiteHeader />
@@ -35,25 +29,14 @@ export default async function SuccessPage({
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/dashboard"
+              href="/login"
               className={cn(
                 buttonVariants(),
                 "h-11 px-5 font-semibold brand-gradient text-white",
               )}
             >
-              Open the dashboard
+              Log in to the dashboard
             </Link>
-            {id ? (
-              <Link
-                href={`/dashboard/${id}`}
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "h-11 px-5",
-                )}
-              >
-                View this customer
-              </Link>
-            ) : null}
           </div>
         </div>
       </main>

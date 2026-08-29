@@ -1,29 +1,56 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { buttonVariants } from "@/components/ui/button";
+import { canManageTeam, isAdmin, roleLabel } from "@/lib/access";
+import type { PublicUser } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export function DashboardHeader() {
+export function DashboardHeader({
+  user,
+  agencyName,
+}: {
+  user: PublicUser;
+  agencyName?: string;
+}) {
+  const links = [
+    { href: "/dashboard", label: isAdmin(user) ? "Customers" : "Clients" },
+  ];
+  if (isAdmin(user)) {
+    links.push({ href: "/dashboard/agencies", label: "Agencies" });
+  }
+  if (canManageTeam(user) || user.agencyId) {
+    links.push({ href: "/dashboard/team", label: "Team" });
+  }
+
   return (
     <header className="border-b border-border bg-white">
-      <div className="mx-auto flex h-[5.25rem] w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex min-h-[5.25rem] w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
           <BrandLogo />
           <div className="hidden sm:block">
             <p className="text-sm font-semibold text-charcoal">
-              Customer dashboard
+              {agencyName || "GBP Auto Ranker"}
             </p>
             <p className="text-xs text-muted-foreground">
-              Manage listings, keywords, and campaign status
+              {roleLabel(user.role)} · {user.name}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <nav className="flex flex-wrap items-center gap-2 text-sm font-medium">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="rounded-lg px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+            >
+              {link.label}
+            </Link>
+          ))}
           <Link
-            href="/get-started"
+            href={isAdmin(user) ? "/get-started" : "/dashboard/clients/new"}
             className={cn(buttonVariants({ variant: "outline" }), "h-9 px-3")}
           >
-            New intake
+            New client
           </Link>
           <form action="/api/auth/logout" method="post">
             <button
@@ -33,7 +60,7 @@ export function DashboardHeader() {
               Sign out
             </button>
           </form>
-        </div>
+        </nav>
       </div>
     </header>
   );

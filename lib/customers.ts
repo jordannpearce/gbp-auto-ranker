@@ -96,6 +96,8 @@ export function parseCustomerUpdate(body: unknown) {
     keywords?: string[];
     internalNotes?: string;
     comments?: string;
+    agencyId?: string;
+    managerUserId?: string;
   } = {};
 
   if ("status" in raw) {
@@ -117,6 +119,12 @@ export function parseCustomerUpdate(body: unknown) {
   }
   if ("comments" in raw) {
     update.comments = trim(raw.comments);
+  }
+  if ("agencyId" in raw) {
+    update.agencyId = trim(raw.agencyId);
+  }
+  if ("managerUserId" in raw) {
+    update.managerUserId = trim(raw.managerUserId);
   }
 
   return { data: update };
