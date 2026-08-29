@@ -1,6 +1,13 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { hashPassword } from "@/lib/passwords";
+import {
+  DEMO_ADMIN_EMAIL,
+  PRIMARY_ADMIN_EMAIL,
+  PRIMARY_ADMIN_ID,
+  PRIMARY_ADMIN_NAME,
+  PRIMARY_ADMIN_PASSWORD,
+} from "@/lib/primary-admin";
 import type {
   Agency,
   PasswordReset,
@@ -78,22 +85,67 @@ export function normalizeUser(raw: Partial<User>): User | null {
   };
 }
 
+async function migratePrimaryAdmin() {
+  const users = (await readJson<Partial<User>[]>(USERS_FILE, []))
+    .map((item) => normalizeUser(item))
+    .filter((item): item is User => Boolean(item));
+  if (users.length === 0) return;
+
+  const primary = users.find(
+    (user) => user.email.toLowerCase() === PRIMARY_ADMIN_EMAIL,
+  );
+  const demo = users.find(
+    (user) => user.email.toLowerCase() === DEMO_ADMIN_EMAIL,
+  );
+  const now = new Date().toISOString();
+  let changed = false;
+
+  if (!primary && demo) {
+    demo.name = PRIMARY_ADMIN_NAME;
+    demo.email = PRIMARY_ADMIN_EMAIL;
+    demo.role = "admin";
+    demo.agencyId = "";
+    demo.passwordHash = await hashPassword(PRIMARY_ADMIN_PASSWORD);
+    demo.emailVerifiedAt = demo.emailVerifiedAt || now;
+    demo.confirmToken = "";
+    demo.confirmExpiresAt = "";
+    changed = true;
+  } else if (!primary) {
+    users.unshift({
+      id: PRIMARY_ADMIN_ID,
+      createdAt: now,
+      name: PRIMARY_ADMIN_NAME,
+      email: PRIMARY_ADMIN_EMAIL,
+      passwordHash: await hashPassword(PRIMARY_ADMIN_PASSWORD),
+      role: "admin",
+      agencyId: "",
+      ...confirmFields(true, now),
+    });
+    changed = true;
+  }
+
+  const next = users.filter(
+    (user) => user.email.toLowerCase() !== DEMO_ADMIN_EMAIL,
+  );
+  if (next.length !== users.length) changed = true;
+  if (changed) await writeJson(USERS_FILE, next);
+}
+
 async function ensureAccounts() {
   await fs.mkdir(DATA_DIR, { recursive: true });
   try {
     await fs.access(USERS_FILE);
-    return;
   } catch {
     const now = new Date().toISOString();
-    const adminHash = await hashPassword("Admin1234!");
+    const adminHash = await hashPassword(PRIMARY_ADMIN_PASSWORD);
     const agencyHash = await hashPassword("Agency1234!");
     const verified = confirmFields(true, now);
     const users: User[] = [
       {
-        id: "user_admin",
+        id: PRIMARY_ADMIN_ID,
         createdAt: now,
-        name: "GBP Admin",
-        email: "admin@gbpautoranker.com",
+        name: PRIMARY_ADMIN_NAME,
+        email: PRIMARY_ADMIN_EMAIL,
         passwordHash: adminHash,
         role: "admin",
         agencyId: "",
@@ -133,6 +185,7 @@ async function ensureAccounts() {
     await writeJson(AGENCIES_FILE, agencies);
     await writeJson(RESETS_FILE, []);
   }
+  await migratePrimaryAdmin();
 }
 
 async function readUsers() {

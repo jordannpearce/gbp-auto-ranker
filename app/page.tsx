@@ -195,6 +195,103 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section id="who-its-for" className="scroll-mt-24">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+            <p className="text-xs font-semibold tracking-[0.2em] text-primary uppercase">
+              Who it is for
+            </p>
+            <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-charcoal">
+              Local businesses that need the map pack, and agencies that run a
+              roster of them.
+            </h2>
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {[
+                [
+                  "Owners and managers",
+                  "Dentists, shops, repair bays, clinics, and storefronts that already claimed their Google Business Profile and lose calls to whoever sits in the top three.",
+                ],
+                [
+                  "Service-area businesses",
+                  "Trades and mobile services that want searches from a city or neighborhood — not a national keyword list.",
+                ],
+                [
+                  "SEO agencies",
+                  "Teams that want one dashboard for every client listing, teammate seats, and a volume rate once they pass ten campaigns.",
+                ],
+              ].map(([title, copy]) => (
+                <article
+                  key={title}
+                  className="rounded-2xl border border-border bg-white p-5"
+                >
+                  <h3 className="font-semibold text-charcoal">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {copy}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-surface">
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-20">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.2em] text-primary uppercase">
+                After you submit
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-charcoal">
+                The listing lands in a dashboard the same day.
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                You get a receipt at the email on the form. The campaign file
+                holds the Maps link, keywords, and comments exactly as you
+                wrote them. If an agency manages the work, they see the same
+                record. We do not swap in a different profile or a stock
+                keyword set.
+              </p>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                Rank is not instant and it is not guaranteed. Google decides
+                the map pack. The campaign is the searches and engagement we
+                run so that listing has a better chance on the terms you named.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-white p-6">
+              <p className="text-sm font-semibold text-primary">Pricing</p>
+              <p className="mt-3 text-4xl font-semibold tracking-tight text-charcoal">
+                $150
+                <span className="ml-2 text-base font-medium text-muted-foreground">
+                  per campaign
+                </span>
+              </p>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                Agency owners who run ten or more campaigns can get a
+                discounted rate. We set that number with you when you reach
+                that volume.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/pricing"
+                  className={cn(
+                    buttonVariants(),
+                    "h-11 px-5 font-semibold brand-gradient text-white",
+                  )}
+                >
+                  See pricing
+                </Link>
+                <Link
+                  href="/for-agencies"
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "h-11 px-5 font-semibold",
+                  )}
+                >
+                  Agency details
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section>
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-20">
             <div>
@@ -260,6 +357,44 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section id="faq" className="scroll-mt-24 border-t border-border bg-surface">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+            <p className="text-xs font-semibold tracking-[0.2em] text-primary uppercase">
+              Questions
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-charcoal">
+              Straight answers before you send a listing.
+            </h2>
+            <dl className="mt-10 grid gap-6 md:grid-cols-2">
+              {[
+                [
+                  "Do I need a website?",
+                  "No. The campaign is built on the Google Business Profile and the Maps link. A website helps visitors after they tap through, but it is not required to start.",
+                ],
+                [
+                  "What if an agency already manages my SEO?",
+                  "They can create an agency account, take the assignment, and keep you as the client. You still submit the Maps link and keywords once.",
+                ],
+                [
+                  "How do I reset a password?",
+                  "Use Forgot password on the login page. We email a one-hour link to the address on the account.",
+                ],
+                [
+                  "What does $150 include?",
+                  "One campaign on one listing, on the keywords you submit. Ten or more campaigns through an agency can qualify for a volume rate we confirm when you book.",
+                ],
+              ].map(([q, a]) => (
+                <div key={q} className="rounded-2xl border border-border bg-white p-5">
+                  <dt className="font-semibold text-charcoal">{q}</dt>
+                  <dd className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {a}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </section>
 

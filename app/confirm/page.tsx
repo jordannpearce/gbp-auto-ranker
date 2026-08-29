@@ -70,7 +70,7 @@ export default async function ConfirmPage({
             "h-11 w-full font-semibold brand-gradient text-white",
           )}
         >
-          Resend confirmation
+          Send confirmation again
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">

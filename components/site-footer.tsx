@@ -19,6 +19,12 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+          <Link href="/pricing" className="hover:text-primary">
+            Pricing
+          </Link>
+          <Link href="/for-agencies" className="hover:text-primary">
+            For agencies
+          </Link>
           <Link href="/get-started" className="hover:text-primary">
             Start a campaign
           </Link>
@@ -28,16 +34,23 @@ export function SiteFooter() {
           <Link href="/signup" className="hover:text-primary">
             Agency signup
           </Link>
-          <Link href="/#how-it-works" className="hover:text-primary">
-            How it works
-          </Link>
         </div>
       </div>
       <div className="border-t border-border">
-        <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} GBP Auto Ranker. Built for local
-          businesses that want to show up first.
-        </p>
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p>© {new Date().getFullYear()} GBP Auto Ranker. Built for local businesses that want to show up first.</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link href="/privacy" className="hover:text-primary">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-primary">
+              Terms
+            </Link>
+            <Link href="/email-policy" className="hover:text-primary">
+              Email policy
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );

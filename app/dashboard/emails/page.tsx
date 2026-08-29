@@ -66,9 +66,10 @@ export default async function EmailsPage({
             Emails
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Send marketing, info, and product-update emails through Resend.
-            Account confirmation, password resets, intake receipts, and
-            assignment notices go out automatically.
+            Send marketing, info, and product-update emails. Account
+            confirmation, password resets, intake receipts, and assignment
+            notices go out automatically. This screen is only visible to
+            GBP Auto Ranker admins.
           </p>
         </div>
 
@@ -95,15 +96,14 @@ export default async function EmailsPage({
           </div>
           {configured ? (
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Transactional and broadcast emails are sent with your Resend API
-              key. Use a verified domain in <code>RESEND_FROM</code>.
+              Transactional and broadcast emails are sent with the admin email
+              key. Use a verified from-address in the environment.
             </p>
           ) : (
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              No <code>RESEND_API_KEY</code> is set, so emails are written to
-              the log and confirmation or reset links appear on screen. Add the
-              key in Railway or <code>.env.local</code> when you are ready to
-              deliver.
+              No email API key is set, so messages are written to the log and
+              confirmation or reset links appear on screen. Add the key in the
+              environment when you are ready to deliver.
             </p>
           )}
           <p className="mt-3 text-xs text-muted-foreground">

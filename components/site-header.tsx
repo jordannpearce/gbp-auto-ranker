@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/#how-it-works", label: "How it works" },
-  { href: "/#what-we-run", label: "What we run" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/for-agencies", label: "For agencies" },
   { href: "/get-started", label: "Start a campaign" },
-  { href: "/signup", label: "Agency signup" },
   { href: "/login", label: "Log in" },
 ];
 

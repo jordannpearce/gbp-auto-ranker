@@ -1,5 +1,12 @@
 import { hashPassword } from "@/lib/passwords";
 import { iso, query, withTransaction } from "@/lib/db";
+import {
+  DEMO_ADMIN_EMAIL,
+  PRIMARY_ADMIN_EMAIL,
+  PRIMARY_ADMIN_ID,
+  PRIMARY_ADMIN_NAME,
+  PRIMARY_ADMIN_PASSWORD,
+} from "@/lib/primary-admin";
 import type { Agency, PasswordReset, User } from "@/lib/types";
 import { normalizeUser } from "@/lib/users-file";
 
@@ -72,22 +79,74 @@ async function insertUser(user: User) {
   );
 }
 
+async function migratePrimaryAdmin() {
+  const primary = await query("SELECT id FROM users WHERE lower(email) = lower($1)", [
+    PRIMARY_ADMIN_EMAIL,
+  ]);
+  const demo = await query("SELECT * FROM users WHERE lower(email) = lower($1)", [
+    DEMO_ADMIN_EMAIL,
+  ]);
+  const now = new Date().toISOString();
+
+  if (primary.rows.length === 0 && demo.rows[0]) {
+    await query(
+      `UPDATE users SET
+        name = $2, email = $3, password_hash = $4, role = 'admin', agency_id = '',
+        email_verified_at = COALESCE(NULLIF(email_verified_at, ''), $5),
+        confirm_token = '', confirm_expires_at = ''
+       WHERE id = $1`,
+      [
+        demo.rows[0].id,
+        PRIMARY_ADMIN_NAME,
+        PRIMARY_ADMIN_EMAIL,
+        await hashPassword(PRIMARY_ADMIN_PASSWORD),
+        now,
+      ],
+    );
+  } else if (primary.rows.length === 0) {
+    const verified = confirmFields(true, now);
+    await query(
+      `INSERT INTO users (
+        id, created_at, name, email, password_hash, role, agency_id,
+        email_verified_at, confirm_token, confirm_expires_at
+      ) VALUES ($1,$2,$3,$4,$5,'admin','',$6,$7,$8)`,
+      [
+        PRIMARY_ADMIN_ID,
+        now,
+        PRIMARY_ADMIN_NAME,
+        PRIMARY_ADMIN_EMAIL,
+        await hashPassword(PRIMARY_ADMIN_PASSWORD),
+        verified.emailVerifiedAt,
+        verified.confirmToken,
+        verified.confirmExpiresAt,
+      ],
+    );
+  }
+
+  await query("DELETE FROM users WHERE lower(email) = lower($1)", [
+    DEMO_ADMIN_EMAIL,
+  ]);
+}
+
 async function ensureAccounts() {
   const { rows } = await query<{ count: string }>(
     "SELECT COUNT(*)::text AS count FROM users",
   );
-  if (Number(rows[0]?.count || 0) > 0) return;
+  if (Number(rows[0]?.count || 0) > 0) {
+    await migratePrimaryAdmin();
+    return;
+  }
 
   const now = new Date().toISOString();
-  const adminHash = await hashPassword("Admin1234!");
+  const adminHash = await hashPassword(PRIMARY_ADMIN_PASSWORD);
   const agencyHash = await hashPassword("Agency1234!");
   const verified = confirmFields(true, now);
   const users: User[] = [
     {
-      id: "user_admin",
+      id: PRIMARY_ADMIN_ID,
       createdAt: now,
-      name: "GBP Admin",
-      email: "admin@gbpautoranker.com",
+      name: PRIMARY_ADMIN_NAME,
+      email: PRIMARY_ADMIN_EMAIL,
       passwordHash: adminHash,
       role: "admin",
       agencyId: "",

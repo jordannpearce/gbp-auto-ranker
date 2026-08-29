@@ -51,7 +51,7 @@ export default async function LoginPage({
             <Label htmlFor="password">Password</Label>
             <Link
               href="/forgot-password"
-              className="text-xs font-medium text-primary hover:underline"
+              className="text-sm font-medium text-primary hover:underline"
             >
               Forgot password?
             </Link>
@@ -109,6 +109,14 @@ export default async function LoginPage({
           Sign in
         </button>
       </form>
+      <p className="mt-4 text-center text-sm">
+        <Link
+          href="/forgot-password"
+          className="font-medium text-primary hover:underline"
+        >
+          Forgot your password?
+        </Link>
+      </p>
       {unverified ? (
         <form action="/api/auth/resend-confirm" method="post" className="mt-4">
           <input type="hidden" name="next" value="/login" />
@@ -117,7 +125,7 @@ export default async function LoginPage({
             type="submit"
             className="text-sm font-medium text-primary hover:underline"
           >
-            Resend confirmation email
+            Send the confirmation email again
           </button>
         </form>
       ) : null}
@@ -127,12 +135,6 @@ export default async function LoginPage({
           Create an agency account
         </Link>
       </p>
-      <div className="mt-6 rounded-xl bg-surface px-4 py-3 text-xs leading-5 text-muted-foreground">
-        <p className="font-semibold text-charcoal">Demo accounts</p>
-        <p>Admin: admin@gbpautoranker.com / Admin1234!</p>
-        <p>Agency owner: maya@northstarlocal.com / Agency1234!</p>
-        <p>Agency user: leo@northstarlocal.com / Agency1234!</p>
-      </div>
     </AuthCard>
   );
 }

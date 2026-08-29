@@ -22,13 +22,7 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 | Agency owner | Agency clients, team roster, ability to add users and new clients. |
 | Agency user | The same client book for that agency. |
 
-Demo logins (seeded on first run):
-
-- Admin: `admin@gbpautoranker.com` / `Admin1234!`
-- Agency owner: `maya@northstarlocal.com` / `Agency1234!`
-- Agency user: `leo@northstarlocal.com` / `Agency1234!`
-
-Change those passwords after you go live. Demo accounts are already confirmed.
+Local seed includes sample agency users for development. The live admin account is created for the operator and is not shown on the public login page.
 
 New agency signups must confirm a work email before they can sign in. Forgot password sends a one-hour reset link through Resend. If `RESEND_API_KEY` is missing, the confirm and reset links are shown on screen and every attempted send is written to the email log.
 

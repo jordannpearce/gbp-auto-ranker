@@ -34,8 +34,8 @@ export default async function SignupCheckEmailPage({
       {token ? (
         <div className="mt-6 rounded-xl bg-surface px-4 py-3 text-sm leading-6 text-charcoal">
           <p>
-            Resend is not configured here, so the confirmation link is shown
-            once:
+            Email delivery is not set up on this host, so the confirmation
+            link is shown once:
           </p>
           <Link
             href={`/api/auth/confirm?token=${token}`}
@@ -57,7 +57,7 @@ export default async function SignupCheckEmailPage({
       >
         <input type="hidden" name="next" value="/signup/check-email" />
         <div>
-          <Label htmlFor="email">Resend to</Label>
+          <Label htmlFor="email">Send again to</Label>
           <Input
             id="email"
             name="email"
@@ -74,7 +74,7 @@ export default async function SignupCheckEmailPage({
             "h-11 w-full font-semibold",
           )}
         >
-          Resend confirmation
+          Send confirmation again
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
