@@ -83,7 +83,6 @@ CREATE TABLE IF NOT EXISTS email_templates (
 CREATE INDEX IF NOT EXISTS users_email_idx ON users (email);
 CREATE INDEX IF NOT EXISTS users_agency_idx ON users (agency_id);
 CREATE INDEX IF NOT EXISTS customers_agency_idx ON customers (agency_id);
-CREATE INDEX IF NOT EXISTS customers_owner_idx ON customers (owner_user_id);
 CREATE INDEX IF NOT EXISTS email_logs_created_idx ON email_logs (created_at DESC);
 `;
 

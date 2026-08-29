@@ -12,6 +12,10 @@ function safeNext(value: string) {
   return value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
 }
 
+export async function GET() {
+  return redirectTo("/login");
+}
+
 export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") || "";
   const viaForm = contentType.includes("form");
