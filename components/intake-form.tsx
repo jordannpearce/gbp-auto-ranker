@@ -22,7 +22,12 @@ export function IntakeForm({
   };
 }) {
   return (
-    <form action="/api/customers" method="post" className="space-y-10">
+    <form
+      action="/api/customers"
+      method="post"
+      className="space-y-10"
+      autoComplete="off"
+    >
       {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
       {assignment ? (
         <FormSection
@@ -98,7 +103,7 @@ export function IntakeForm({
             id="contactName"
             name="contactName"
             required
-            autoComplete="name"
+            autoComplete="off"
             placeholder="Jordan Hale"
           />
         </Field>
@@ -108,7 +113,7 @@ export function IntakeForm({
             name="email"
             type="email"
             required
-            autoComplete="email"
+            autoComplete="off"
             placeholder="you@business.com"
           />
         </Field>
@@ -118,7 +123,7 @@ export function IntakeForm({
             name="phone"
             type="tel"
             required
-            autoComplete="tel"
+            autoComplete="off"
             placeholder="(555) 123-4567"
           />
         </Field>
@@ -172,7 +177,7 @@ export function IntakeForm({
           <Input
             id="address"
             name="address"
-            autoComplete="street-address"
+            autoComplete="off"
             placeholder="123 Main Street"
           />
         </Field>
@@ -181,7 +186,7 @@ export function IntakeForm({
             id="city"
             name="city"
             required
-            autoComplete="address-level2"
+            autoComplete="off"
             placeholder="Austin"
           />
         </Field>
@@ -190,7 +195,7 @@ export function IntakeForm({
             id="state"
             name="state"
             required
-            autoComplete="address-level1"
+            autoComplete="off"
             placeholder="CA"
           />
         </Field>
@@ -198,7 +203,7 @@ export function IntakeForm({
           <Input
             id="zip"
             name="zip"
-            autoComplete="postal-code"
+            autoComplete="off"
             placeholder="94965"
           />
         </Field>
