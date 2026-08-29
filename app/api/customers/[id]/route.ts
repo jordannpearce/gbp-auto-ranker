@@ -60,6 +60,7 @@ export async function POST(
   if (isAdmin(user)) {
     updateBody.agencyId = form.get("agencyId");
     updateBody.managerUserId = form.get("managerUserId");
+    updateBody.ownerUserId = form.get("ownerUserId");
   }
 
   const parsed = parseCustomerUpdate(updateBody);

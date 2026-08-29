@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { buttonVariants } from "@/components/ui/button";
-import { canManageTeam, isAdmin, roleLabel } from "@/lib/access";
+import {
+  canManageTeam,
+  isAdmin,
+  isBusinessOwner,
+  roleLabel,
+} from "@/lib/access";
 import type { PublicUser } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +18,14 @@ export function DashboardHeader({
   agencyName?: string;
 }) {
   const links = [
-    { href: "/dashboard", label: isAdmin(user) ? "Customers" : "Clients" },
+    {
+      href: "/dashboard",
+      label: isAdmin(user)
+        ? "Customers"
+        : isBusinessOwner(user)
+          ? "Locations"
+          : "Clients",
+    },
   ];
   if (isAdmin(user)) {
     links.push({ href: "/dashboard/agencies", label: "Agencies" });
@@ -54,7 +66,7 @@ export function DashboardHeader({
             href="/dashboard/clients/new"
             className={cn(buttonVariants({ variant: "outline" }), "h-9 px-3")}
           >
-            New client
+            {isBusinessOwner(user) ? "New location" : "New client"}
           </Link>
           <form action="/api/auth/logout" method="post">
             <button

@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS customers (
   referral_source TEXT NOT NULL DEFAULT '',
   internal_notes TEXT NOT NULL DEFAULT '',
   agency_id TEXT NOT NULL DEFAULT '',
-  manager_user_id TEXT NOT NULL DEFAULT ''
+  manager_user_id TEXT NOT NULL DEFAULT '',
+  owner_user_id TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS email_logs (
@@ -82,7 +83,13 @@ CREATE TABLE IF NOT EXISTS email_templates (
 CREATE INDEX IF NOT EXISTS users_email_idx ON users (email);
 CREATE INDEX IF NOT EXISTS users_agency_idx ON users (agency_id);
 CREATE INDEX IF NOT EXISTS customers_agency_idx ON customers (agency_id);
+CREATE INDEX IF NOT EXISTS customers_owner_idx ON customers (owner_user_id);
 CREATE INDEX IF NOT EXISTS email_logs_created_idx ON email_logs (created_at DESC);
+`;
+
+const MIGRATIONS_SQL = `
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS owner_user_id TEXT NOT NULL DEFAULT '';
+CREATE INDEX IF NOT EXISTS customers_owner_idx ON customers (owner_user_id);
 `;
 
 export function isPostgres() {
@@ -151,6 +158,7 @@ export async function ensureSchema() {
   if (!migrateChain) {
     migrateChain = (async () => {
       await getPool().query(SCHEMA_SQL);
+      await getPool().query(MIGRATIONS_SQL);
       migrated = true;
     })().catch((error) => {
       migrateChain = null;

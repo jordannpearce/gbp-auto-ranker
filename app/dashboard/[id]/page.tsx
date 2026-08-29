@@ -35,13 +35,16 @@ export default async function CustomerPage({
   if (!customer || !canSeeCustomer(user, customer)) notFound();
 
   const [agencies, users] = await Promise.all([listAgencies(), listUsers()]);
-  const managers = users
-    .filter((item) => item.role !== "admin")
-    .map(toPublicUser);
+  const publicUsers = users.map(toPublicUser);
+  const managers = publicUsers.filter(
+    (item) => item.role === "agency_owner" || item.role === "agency_member",
+  );
+  const owners = publicUsers.filter((item) => item.role === "business_owner");
   const assignedAgency = customer.agencyId
     ? await getAgency(customer.agencyId)
     : null;
   const manager = users.find((item) => item.id === customer.managerUserId);
+  const owner = users.find((item) => item.id === customer.ownerUserId);
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-surface">
@@ -52,8 +55,10 @@ export default async function CustomerPage({
           user={user}
           agencies={agencies}
           managers={managers}
+          owners={owners}
           agencyName={assignedAgency?.name}
           managerName={manager?.name}
+          ownerName={owner?.name}
           error={error}
           saved={saved === "1"}
         />

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { DashboardView } from "@/components/dashboard-view";
-import { isAdmin, visibleCustomers } from "@/lib/access";
+import { isAdmin, isBusinessOwner, visibleCustomers } from "@/lib/access";
 import { loadDashboardUser } from "@/lib/dashboard";
 import { listCustomers } from "@/lib/store";
 import { CAMPAIGN_STATUSES, type CampaignStatus } from "@/lib/types";
@@ -45,17 +45,22 @@ export default async function DashboardPage({
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold tracking-tight text-charcoal">
-            {isAdmin(user) ? "Customers" : "Your clients"}
+            {isAdmin(user)
+              ? "Customers"
+              : isBusinessOwner(user)
+                ? "Your locations"
+                : "Your clients"}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             {isAdmin(user)
-              ? "Add customers here, then assign them to an agency. Open a listing to change the assignment."
-              : "These are the businesses assigned to your agency. Add a client or open one to see the keywords and Maps listing."}
+              ? "Add customers here, then assign them to an agency or a business owner."
+              : isBusinessOwner(user)
+                ? "Each location is a Google Business Profile you want in the map pack. Add another when you open a second shop."
+                : "These are the businesses assigned to your agency. Add a client or open one to see the keywords and Maps listing."}
           </p>
           {confirmed ? (
             <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-              Email confirmed. Your agency account is ready to add clients and
-              team seats.
+              Email confirmed. You can add locations or clients from here.
             </p>
           ) : null}
         </div>
@@ -65,6 +70,7 @@ export default async function DashboardPage({
           status={selectedStatus}
           scope={selectedScope}
           isAdmin={isAdmin(user)}
+          isBusinessOwner={isBusinessOwner(user)}
           agencies={agencies}
           users={publicUsers}
         />

@@ -8,24 +8,26 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 
 - Marketing site with the brand logo and blue/black/white palette
 - Campaign intake: name, business details, Google Maps link, keywords, comments
-- Email/password login, forgot-password reset, and agency signup with email confirmation
+- Email/password login, forgot-password reset, and signup for agencies or business owners
 - Transactional and broadcast email through [Resend](https://resend.com): confirmations, welcome, resets, intake receipts, assignment notices, team invites, plus admin marketing/info/update emails
 - Admin Emails page to save the Resend API key, from-address, and editable templates
-- Admin dashboard: add agencies, users, and customers; assign listings to agencies
+- Admin dashboard: add agencies, users, and customers; assign listings to agencies or business owners
 - Agency dashboard: add their own clients, manage team seats, and run campaigns
+- Business-owner dashboard: add and manage multiple locations on one login
 - Postgres on Railway for accounts, customers, and the email log, with JSON files as a local fallback
 
 ## Accounts
 
 | Role | What they see |
 | --- | --- |
-| Admin | Every customer. Manually adds agencies, users, and customers, then assigns listings to an agency or a specific user. |
+| Admin | Every customer. Manually adds agencies, users, and customers, then assigns listings to an agency or a business owner. |
 | Agency owner | Agency clients, team roster, ability to add users and new clients. |
 | Agency user | The same client book, plus the ability to add clients for that agency. |
+| Business owner | Their locations only. Can add more listings on the same account. |
 
 The live admin account is created for the operator and is not shown on the public login page. Sample clients and the old demo agency are not seeded.
 
-New agency signups must confirm a work email before they can sign in. Forgot password sends a one-hour reset link. Save a Resend API key on `/dashboard/emails` (or set `RESEND_API_KEY`). Without a key, confirm and reset links are shown on screen and every attempted send is written to the email log.
+New agency and business-owner signups must confirm an email before they can sign in. Forgot password sends a one-hour reset link. Save a Resend API key on `/dashboard/emails` (or set `RESEND_API_KEY`). Without a key, confirm and reset links are shown on screen and every attempted send is written to the email log.
 
 ## Local development
 
@@ -42,9 +44,9 @@ Open [http://127.0.0.1:4410](http://127.0.0.1:4410).
 | `/` | Marketing site |
 | `/get-started` | Public campaign intake |
 | `/login` | User login |
-| `/signup` | Agency account creation (confirmation email) |
+| `/signup` | Agency or business-owner account (confirmation email) |
 | `/dashboard` | Role-aware workspace |
-| `/dashboard/clients/new` | Add a customer (admin can assign an agency) |
+| `/dashboard/clients/new` | Add a customer or location |
 | `/dashboard/agencies/new` | Admin creates an agency and owner login |
 | `/dashboard/team` | Add users (admins, owners, or agency seats) |
 | `/dashboard/emails` | Admin Resend settings, templates, composer, and send log |

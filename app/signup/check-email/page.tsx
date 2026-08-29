@@ -22,8 +22,8 @@ export default async function SignupCheckEmailPage({
       title="Check your email"
       copy={
         email
-          ? `We sent a confirmation link to ${email}. Open it to activate the agency account.`
-          : "We sent a confirmation link to the address you used. Open it to activate the agency account."
+          ? `We sent a confirmation link to ${email}. Open it to activate the account.`
+          : "We sent a confirmation link to the address you used. Open it to activate the account."
       }
     >
       {resent ? (

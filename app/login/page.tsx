@@ -29,7 +29,7 @@ export default async function LoginPage({
   return (
     <AuthCard
       title="Log in"
-      copy="Agency teams and admins use the same door. Enter the email and password for your account."
+      copy="Agency teams, business owners, and admins use the same door. Enter the email and password for your account."
     >
       <form action="/api/auth/login" method="post" className="mt-6 space-y-4">
         <input type="hidden" name="next" value={next || "/dashboard"} />
@@ -130,9 +130,16 @@ export default async function LoginPage({
         </form>
       ) : null}
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        SEO agency?{" "}
+        Need an account?{" "}
         <Link href="/signup" className="font-medium text-primary hover:underline">
-          Create an agency account
+          Agency
+        </Link>
+        {" · "}
+        <Link
+          href="/signup?as=business"
+          className="font-medium text-primary hover:underline"
+        >
+          Business owner
         </Link>
       </p>
     </AuthCard>

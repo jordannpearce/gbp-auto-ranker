@@ -11,15 +11,20 @@ export function isAgencyUser(user: Pick<User, "role" | "agencyId">) {
   );
 }
 
+export function isBusinessOwner(user: Pick<User, "role">) {
+  return user.role === "business_owner";
+}
+
 export function canManageTeam(user: Pick<User, "role">) {
   return user.role === "admin" || user.role === "agency_owner";
 }
 
 export function canSeeCustomer(
-  user: Pick<User, "role" | "agencyId">,
-  customer: Pick<Customer, "agencyId">,
+  user: Pick<User, "role" | "agencyId" | "id">,
+  customer: Pick<Customer, "agencyId" | "ownerUserId">,
 ) {
   if (isAdmin(user)) return true;
+  if (isBusinessOwner(user)) return customer.ownerUserId === user.id;
   return Boolean(user.agencyId) && customer.agencyId === user.agencyId;
 }
 
@@ -29,7 +34,9 @@ export function visibleCustomers(
   scope: "all" | "mine" | "unassigned" = "all",
 ) {
   let list = customers;
-  if (!isAdmin(user)) {
+  if (isBusinessOwner(user)) {
+    list = customers.filter((customer) => customer.ownerUserId === user.id);
+  } else if (!isAdmin(user)) {
     list = customers.filter((customer) => customer.agencyId === user.agencyId);
   }
   if (scope === "mine") {
@@ -44,5 +51,6 @@ export function visibleCustomers(
 export function roleLabel(role: PublicUser["role"]) {
   if (role === "admin") return "Admin";
   if (role === "agency_owner") return "Agency owner";
+  if (role === "business_owner") return "Business owner";
   return "Agency user";
 }

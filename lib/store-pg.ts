@@ -1,6 +1,11 @@
 import { iso, query } from "@/lib/db";
 import { DEMO_AGENCY_IDS, DEMO_CUSTOMER_IDS } from "@/lib/demo-ids";
-import type { Customer, CustomerInput, CustomerUpdate } from "@/lib/types";
+import type {
+  Customer,
+  CustomerExtras,
+  CustomerInput,
+  CustomerUpdate,
+} from "@/lib/types";
 
 function mapCustomer(row: Record<string, unknown>): Customer {
   return {
@@ -28,6 +33,7 @@ function mapCustomer(row: Record<string, unknown>): Customer {
     internalNotes: String(row.internal_notes ?? ""),
     agencyId: String(row.agency_id ?? ""),
     managerUserId: String(row.manager_user_id ?? ""),
+    ownerUserId: String(row.owner_user_id ?? ""),
   };
 }
 
@@ -54,7 +60,7 @@ export async function getCustomer(id: string) {
 
 export async function createCustomer(
   input: CustomerInput,
-  extras?: { agencyId?: string; managerUserId?: string },
+  extras?: CustomerExtras,
 ) {
   const now = new Date().toISOString();
   const customer: Customer = {
@@ -66,15 +72,16 @@ export async function createCustomer(
     internalNotes: "",
     agencyId: extras?.agencyId ?? "",
     managerUserId: extras?.managerUserId ?? "",
+    ownerUserId: extras?.ownerUserId ?? "",
   };
   await query(
     `INSERT INTO customers (
       id, created_at, updated_at, status, contact_name, email, phone, role,
       business_name, category, address, city, state, zip, website,
       google_maps_url, keywords, service_area, primary_goal, comments,
-      referral_source, internal_notes, agency_id, manager_user_id
+      referral_source, internal_notes, agency_id, manager_user_id, owner_user_id
     ) VALUES (
-      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24
+      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25
     )`,
     [
       customer.id,
@@ -101,6 +108,7 @@ export async function createCustomer(
       customer.internalNotes,
       customer.agencyId,
       customer.managerUserId,
+      customer.ownerUserId,
     ],
   );
   return customer;
@@ -117,7 +125,7 @@ export async function updateCustomer(id: string, update: CustomerUpdate) {
   await query(
     `UPDATE customers SET
       updated_at = $2, status = $3, keywords = $4, internal_notes = $5,
-      comments = $6, agency_id = $7, manager_user_id = $8
+      comments = $6, agency_id = $7, manager_user_id = $8, owner_user_id = $9
      WHERE id = $1`,
     [
       id,
@@ -128,6 +136,7 @@ export async function updateCustomer(id: string, update: CustomerUpdate) {
       next.comments,
       next.agencyId,
       next.managerUserId,
+      next.ownerUserId,
     ],
   );
   return next;

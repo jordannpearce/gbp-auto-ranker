@@ -65,6 +65,10 @@ export async function POST(request: Request) {
     recipients = users
       .filter((item) => item.role === "agency_member")
       .map((item) => item.email);
+  } else if (audience === "business_owners") {
+    recipients = users
+      .filter((item) => item.role === "business_owner")
+      .map((item) => item.email);
   } else if (audience === "customers") {
     recipients = customers.map((item) => item.email);
   } else {

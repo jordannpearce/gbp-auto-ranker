@@ -7,42 +7,80 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Agency signup",
+  title: "Create an account",
 };
 
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; as?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, as } = await searchParams;
+  const isBusiness = as === "business";
 
   return (
     <AuthCard
-      title="Create an agency account"
-      copy="White-label GBP Auto Ranker for the businesses you manage. We’ll email a confirmation link before you can sign in."
+      title={isBusiness ? "Create a business account" : "Create an agency account"}
+      copy={
+        isBusiness
+          ? "Own a Google Business Profile? Create an account so you can add locations and see each campaign. We’ll email a confirmation link before you can sign in."
+          : "White-label GBP Auto Ranker for the businesses you manage. We’ll email a confirmation link before you can sign in."
+      }
     >
+      <div className="mt-6 grid grid-cols-2 gap-2 rounded-xl bg-surface p-1">
+        <Link
+          href="/signup"
+          className={cn(
+            "rounded-lg px-3 py-2 text-center text-sm font-medium",
+            !isBusiness
+              ? "bg-white text-charcoal shadow-sm"
+              : "text-muted-foreground hover:text-charcoal",
+          )}
+        >
+          SEO agency
+        </Link>
+        <Link
+          href="/signup?as=business"
+          className={cn(
+            "rounded-lg px-3 py-2 text-center text-sm font-medium",
+            isBusiness
+              ? "bg-white text-charcoal shadow-sm"
+              : "text-muted-foreground hover:text-charcoal",
+          )}
+        >
+          Business owner
+        </Link>
+      </div>
       <form action="/api/auth/signup" method="post" className="mt-6 space-y-4">
-        <div>
-          <Label htmlFor="agencyName">Agency name</Label>
-          <Input
-            id="agencyName"
-            name="agencyName"
-            required
-            className="mt-2"
-            placeholder="Your agency"
-          />
-        </div>
-        <div>
-          <Label htmlFor="website">Agency website</Label>
-          <Input
-            id="website"
-            name="website"
-            type="url"
-            className="mt-2"
-            placeholder="https://youragency.com"
-          />
-        </div>
+        <input
+          type="hidden"
+          name="accountType"
+          value={isBusiness ? "business" : "agency"}
+        />
+        {isBusiness ? null : (
+          <>
+            <div>
+              <Label htmlFor="agencyName">Agency name</Label>
+              <Input
+                id="agencyName"
+                name="agencyName"
+                required
+                className="mt-2"
+                placeholder="Your agency"
+              />
+            </div>
+            <div>
+              <Label htmlFor="website">Agency website</Label>
+              <Input
+                id="website"
+                name="website"
+                type="url"
+                className="mt-2"
+                placeholder="https://youragency.com"
+              />
+            </div>
+          </>
+        )}
         <div>
           <Label htmlFor="name">Your name</Label>
           <Input
@@ -55,7 +93,7 @@ export default async function SignupPage({
           />
         </div>
         <div>
-          <Label htmlFor="email">Work email</Label>
+          <Label htmlFor="email">{isBusiness ? "Email" : "Work email"}</Label>
           <Input
             id="email"
             name="email"
@@ -63,7 +101,7 @@ export default async function SignupPage({
             required
             autoComplete="email"
             className="mt-2"
-            placeholder="you@agency.com"
+            placeholder={isBusiness ? "you@business.com" : "you@agency.com"}
           />
         </div>
         <div>
@@ -91,7 +129,7 @@ export default async function SignupPage({
             "h-11 w-full font-semibold brand-gradient text-white",
           )}
         >
-          Create agency account
+          {isBusiness ? "Create business account" : "Create agency account"}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">

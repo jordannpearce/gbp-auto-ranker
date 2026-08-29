@@ -1,7 +1,7 @@
 import { isPostgres } from "@/lib/db";
 import * as file from "@/lib/store-file";
 import * as pg from "@/lib/store-pg";
-import type { CustomerInput, CustomerUpdate } from "@/lib/types";
+import type { CustomerExtras, CustomerInput, CustomerUpdate } from "@/lib/types";
 
 export { customerStats } from "@/lib/stats";
 
@@ -19,7 +19,7 @@ export async function getCustomer(id: string) {
 
 export async function createCustomer(
   input: CustomerInput,
-  extras?: { agencyId?: string; managerUserId?: string },
+  extras?: CustomerExtras,
 ) {
   return repo().createCustomer(input, extras);
 }

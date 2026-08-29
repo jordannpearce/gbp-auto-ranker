@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
-import { isAdmin, isAgencyUser, visibleCustomers } from "@/lib/access";
+import {
+  isAdmin,
+  isAgencyUser,
+  isBusinessOwner,
+  visibleCustomers,
+} from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { parseCustomerInput } from "@/lib/customers";
 import { redirectTo } from "@/lib/http";
 import { notifyAssignment, notifyCampaignReceived } from "@/lib/notify";
 import { createCustomer, customerStats, listCustomers } from "@/lib/store";
+import type { CustomerExtras } from "@/lib/types";
 import { getUser } from "@/lib/users";
 
 export const dynamic = "force-dynamic";
@@ -54,9 +60,22 @@ export async function POST(request: Request) {
   }
 
   const user = await getCurrentUser();
-  let extras: { agencyId?: string; managerUserId?: string } | undefined;
+  let extras: CustomerExtras | undefined;
   if (user && isAgencyUser(user)) {
     extras = { agencyId: user.agencyId, managerUserId: user.id };
+  } else if (user && isBusinessOwner(user)) {
+    const existing = visibleCustomers(user, await listCustomers());
+    const agencyIds = [
+      ...new Set(existing.map((item) => item.agencyId).filter(Boolean)),
+    ];
+    const managerIds = [
+      ...new Set(existing.map((item) => item.managerUserId).filter(Boolean)),
+    ];
+    extras = {
+      ownerUserId: user.id,
+      agencyId: agencyIds.length === 1 ? agencyIds[0] : "",
+      managerUserId: managerIds.length === 1 ? managerIds[0] : "",
+    };
   } else if (user && isAdmin(user) && raw && typeof raw === "object") {
     const agencyId = String(
       (raw as { agencyId?: string }).agencyId ?? "",
@@ -64,23 +83,38 @@ export async function POST(request: Request) {
     const managerUserId = String(
       (raw as { managerUserId?: string }).managerUserId ?? "",
     ).trim();
-    if (agencyId) {
-      if (managerUserId) {
-        const manager = await getUser(managerUserId);
-        if (!manager || manager.agencyId !== agencyId) {
-          if (viaForm) {
-            return redirectTo(
-              `/dashboard/clients/new?error=${encodeURIComponent("That user is not on the selected agency.")}`,
-            );
-          }
-          return NextResponse.json(
-            { error: "That user is not on the selected agency." },
-            { status: 400 },
+    const ownerUserId = String(
+      (raw as { ownerUserId?: string }).ownerUserId ?? "",
+    ).trim();
+    if (ownerUserId) {
+      const owner = await getUser(ownerUserId);
+      if (!owner || owner.role !== "business_owner") {
+        if (viaForm) {
+          return redirectTo(
+            `/dashboard/clients/new?error=${encodeURIComponent("Choose a business owner account.")}`,
           );
         }
+        return NextResponse.json(
+          { error: "Choose a business owner account." },
+          { status: 400 },
+        );
       }
-      extras = { agencyId, managerUserId };
     }
+    if (agencyId && managerUserId) {
+      const manager = await getUser(managerUserId);
+      if (!manager || manager.agencyId !== agencyId) {
+        if (viaForm) {
+          return redirectTo(
+            `/dashboard/clients/new?error=${encodeURIComponent("That user is not on the selected agency.")}`,
+          );
+        }
+        return NextResponse.json(
+          { error: "That user is not on the selected agency." },
+          { status: 400 },
+        );
+      }
+    }
+    extras = { agencyId, managerUserId, ownerUserId };
   }
 
   const customer = await createCustomer(parsed.data, extras);

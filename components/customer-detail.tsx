@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { isAdmin } from "@/lib/access";
+import { isAdmin, isBusinessOwner } from "@/lib/access";
 import { formatLocation, STATUS_LABELS } from "@/lib/customers";
 import { formatDateTime } from "@/lib/format";
 import type { Agency, PublicUser } from "@/lib/types";
@@ -24,8 +24,10 @@ export function CustomerDetail({
   user,
   agencies,
   managers,
+  owners,
   agencyName,
   managerName,
+  ownerName,
   error,
   saved,
 }: {
@@ -33,8 +35,10 @@ export function CustomerDetail({
   user: PublicUser;
   agencies: Agency[];
   managers: PublicUser[];
+  owners?: PublicUser[];
   agencyName?: string;
   managerName?: string;
+  ownerName?: string;
   error?: string;
   saved?: boolean;
 }) {
@@ -47,7 +51,11 @@ export function CustomerDetail({
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             <ArrowLeft className="size-4" />
-            {isAdmin(user) ? "All customers" : "All clients"}
+            {isAdmin(user)
+              ? "All customers"
+              : isBusinessOwner(user)
+                ? "All locations"
+                : "All clients"}
           </Link>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-charcoal">
             {customer.businessName}
@@ -162,6 +170,23 @@ export function CustomerDetail({
               {isAdmin(user) ? (
                 <>
                   <div>
+                    <Label htmlFor="ownerUserId">Business owner</Label>
+                    <select
+                      id="ownerUserId"
+                      name="ownerUserId"
+                      form="campaign-form"
+                      defaultValue={customer.ownerUserId}
+                      className={cn(selectClassName, "mt-2")}
+                    >
+                      <option value="">No business login</option>
+                      {(owners || []).map((owner) => (
+                        <option key={owner.id} value={owner.id}>
+                          {owner.name} · {owner.email}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
                     <Label htmlFor="agencyId">Assign to agency</Label>
                     <select
                       id="agencyId"
@@ -198,11 +223,16 @@ export function CustomerDetail({
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {agencyName
-                    ? `Managed by ${agencyName}${managerName ? ` · ${managerName}` : ""}`
-                    : "Assigned to your agency."}
+                  {isBusinessOwner(user)
+                    ? ownerName
+                      ? `This location is on ${ownerName}'s account.`
+                      : "This location is on your business account."
+                    : agencyName
+                      ? `Managed by ${agencyName}${managerName ? ` · ${managerName}` : ""}`
+                      : "Assigned to your agency."}
                 </p>
               )}
+              {isBusinessOwner(user) ? null : (
               <div>
                 <Label htmlFor="internalNotes">Internal notes</Label>
                 <Textarea
@@ -215,6 +245,7 @@ export function CustomerDetail({
                   placeholder="Scheduling notes, signal windows, competitor watchlist…"
                 />
               </div>
+              )}
               {error ? (
                 <p className="text-sm text-red-600" role="alert">
                   {error}

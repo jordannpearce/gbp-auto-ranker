@@ -23,19 +23,24 @@ export default async function SuccessPage() {
             Campaign received.
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Your listing, Maps link, and keywords are in the customer dashboard.
-            We’ll email a receipt to the address you submitted, then use exactly
-            those details to run searches and engagement against the profile.
+            Your listing, Maps link, and keywords are in. Create a business
+            account if you want to add more locations and see each campaign.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/login"
+              href="/signup?as=business"
               className={cn(
                 buttonVariants(),
                 "h-11 px-5 font-semibold brand-gradient text-white",
               )}
             >
-              Log in to the dashboard
+              Create a business account
+            </Link>
+            <Link
+              href="/login"
+              className={cn(buttonVariants({ variant: "outline" }), "h-11 px-5")}
+            >
+              Log in
             </Link>
           </div>
         </div>

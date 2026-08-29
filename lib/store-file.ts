@@ -1,7 +1,12 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { DEMO_AGENCY_IDS, DEMO_CUSTOMER_IDS } from "@/lib/demo-ids";
-import type { Customer, CustomerInput, CustomerUpdate } from "@/lib/types";
+import type {
+  Customer,
+  CustomerExtras,
+  CustomerInput,
+  CustomerUpdate,
+} from "@/lib/types";
 export { customerStats } from "@/lib/stats";
 
 const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), "data");
@@ -36,6 +41,7 @@ function normalizeCustomer(raw: Partial<Customer>): Customer | null {
     internalNotes: raw.internalNotes || "",
     agencyId: raw.agencyId || "",
     managerUserId: raw.managerUserId || "",
+    ownerUserId: raw.ownerUserId || "",
   };
 }
 
@@ -99,7 +105,7 @@ export async function getCustomer(id: string) {
 
 export async function createCustomer(
   input: CustomerInput,
-  extras?: { agencyId?: string; managerUserId?: string },
+  extras?: CustomerExtras,
 ) {
   return withLock(async () => {
     const customers = await readCustomers();
@@ -113,6 +119,7 @@ export async function createCustomer(
       internalNotes: "",
       agencyId: extras?.agencyId ?? "",
       managerUserId: extras?.managerUserId ?? "",
+      ownerUserId: extras?.ownerUserId ?? "",
     };
     customers.unshift(customer);
     await writeCustomers(customers);

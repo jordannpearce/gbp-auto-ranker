@@ -40,7 +40,7 @@ export default async function TeamPage({
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             {isAdmin(user)
-              ? "Add admins, agency owners, and agency users. Owners can also add their own team seats."
+              ? "Add admins, agency owners, agency users, and business owners. Owners can also add their own team seats."
               : "Add users so more people at the agency can manage the same client book."}
           </p>
         </div>
@@ -69,6 +69,7 @@ export default async function TeamPage({
                       <option value="admin">Admin</option>
                       <option value="agency_owner">Agency owner</option>
                       <option value="agency_member">Agency user</option>
+                      <option value="business_owner">Business owner</option>
                     </select>
                   </div>
                   <div>
@@ -79,7 +80,7 @@ export default async function TeamPage({
                       defaultValue=""
                       className={cn(selectClassName, "mt-2")}
                     >
-                      <option value="">None — admin account</option>
+                      <option value="">None — admin or business owner</option>
                       {agencies.map((item) => (
                         <option key={item.id} value={item.id}>
                           {item.name}

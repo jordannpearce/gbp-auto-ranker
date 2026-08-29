@@ -397,6 +397,7 @@ export default async function EmailsPage({
                 >
                   <option value="all_users">All users</option>
                   <option value="agency_owners">Agency owners</option>
+                  <option value="business_owners">Business owners</option>
                   <option value="agency_members">Agency users</option>
                   <option value="customers">Customer contacts</option>
                   <option value="custom">Specific addresses</option>

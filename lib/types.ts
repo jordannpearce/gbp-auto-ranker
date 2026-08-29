@@ -16,7 +16,12 @@ export const PRIMARY_GOALS = [
   "More in-store visits",
 ] as const;
 
-export const USER_ROLES = ["admin", "agency_owner", "agency_member"] as const;
+export const USER_ROLES = [
+  "admin",
+  "agency_owner",
+  "agency_member",
+  "business_owner",
+] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 export type User = {
@@ -61,6 +66,7 @@ export const EMAIL_AUDIENCES = [
   "all_users",
   "agency_owners",
   "agency_members",
+  "business_owners",
   "customers",
   "custom",
 ] as const;
@@ -116,6 +122,7 @@ export type Customer = {
   internalNotes: string;
   agencyId: string;
   managerUserId: string;
+  ownerUserId: string;
 };
 
 export type CustomerInput = Omit<
@@ -127,7 +134,14 @@ export type CustomerInput = Omit<
   | "internalNotes"
   | "agencyId"
   | "managerUserId"
+  | "ownerUserId"
 >;
+
+export type CustomerExtras = {
+  agencyId?: string;
+  managerUserId?: string;
+  ownerUserId?: string;
+};
 
 export type CustomerUpdate = Partial<
   Pick<
@@ -138,5 +152,6 @@ export type CustomerUpdate = Partial<
     | "comments"
     | "agencyId"
     | "managerUserId"
+    | "ownerUserId"
   >
 >;

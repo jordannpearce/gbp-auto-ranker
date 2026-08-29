@@ -23,6 +23,7 @@ type DashboardViewProps = {
   status: CampaignStatus | "all";
   scope: "all" | "mine" | "unassigned";
   isAdmin: boolean;
+  isBusinessOwner?: boolean;
   agencies: Agency[];
   users: PublicUser[];
 };
@@ -33,6 +34,7 @@ export function DashboardView({
   status,
   scope,
   isAdmin,
+  isBusinessOwner,
   agencies,
   users,
 }: DashboardViewProps) {
@@ -58,9 +60,15 @@ export function DashboardView({
     <div className="space-y-8">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Customers"
+          label={isBusinessOwner ? "Locations" : "Customers"}
           value={stats.total}
-          hint={isAdmin ? "All campaigns in the book" : "Clients on your roster"}
+          hint={
+            isAdmin
+              ? "All campaigns in the book"
+              : isBusinessOwner
+                ? "Listings on your account"
+                : "Clients on your roster"
+          }
           icon={Building2}
         />
         <StatCard
@@ -109,6 +117,7 @@ export function DashboardView({
             </option>
           ))}
         </select>
+        {isBusinessOwner ? null : (
         <select
           name="scope"
           defaultValue={scope}
@@ -118,6 +127,7 @@ export function DashboardView({
           <option value="mine">Assigned to me</option>
           {isAdmin ? <option value="unassigned">Unassigned</option> : null}
         </select>
+        )}
         <button
           type="submit"
           className={cn(buttonVariants({ variant: "outline" }), "h-10 px-4")}
@@ -130,14 +140,18 @@ export function DashboardView({
         <div className="rounded-2xl border border-dashed border-border bg-white px-6 py-16 text-center">
           <p className="text-lg font-semibold text-charcoal">
             {customers.length === 0
-              ? "No customers yet"
+              ? isBusinessOwner
+                ? "No locations yet"
+                : "No customers yet"
               : "No matches for that search"}
           </p>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
             {customers.length === 0
               ? isAdmin
                 ? "Add a customer yourself, or wait for public intake and agency-added clients."
-                : "Add a client to start ranking their Google Business Profile."
+                : isBusinessOwner
+                  ? "Add your first Google Business Profile. You can add more locations after that."
+                  : "Add a client to start ranking their Google Business Profile."
               : "Try another keyword, business name, or clear the status filter."}
           </p>
           {customers.length === 0 ? (
@@ -148,7 +162,7 @@ export function DashboardView({
                 "mt-5 inline-flex h-10 px-4 font-semibold brand-gradient text-white",
               )}
             >
-              Add a client
+              {isBusinessOwner ? "Add a location" : "Add a client"}
             </Link>
           ) : null}
         </div>

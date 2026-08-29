@@ -98,6 +98,7 @@ export function parseCustomerUpdate(body: unknown) {
     comments?: string;
     agencyId?: string;
     managerUserId?: string;
+    ownerUserId?: string;
   } = {};
 
   if ("status" in raw) {
@@ -125,6 +126,9 @@ export function parseCustomerUpdate(body: unknown) {
   }
   if ("managerUserId" in raw) {
     update.managerUserId = trim(raw.managerUserId);
+  }
+  if ("ownerUserId" in raw) {
+    update.ownerUserId = trim(raw.ownerUserId);
   }
 
   return { data: update };

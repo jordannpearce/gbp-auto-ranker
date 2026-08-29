@@ -22,13 +22,13 @@ export async function POST(request: Request) {
       ? requestedRole
       : "agency_member";
   const agencyId =
-    role === "admin"
+    role === "admin" || role === "business_owner"
       ? ""
       : isAdmin(user)
         ? String(form.get("agencyId") ?? "").trim()
         : user.agencyId;
 
-  if (role !== "admin" && !agencyId) {
+  if (role !== "admin" && role !== "business_owner" && !agencyId) {
     return redirectTo(
       `/dashboard/team?error=${encodeURIComponent("Choose an agency for this user.")}`,
     );
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (role === "admin") {
+  if (role === "admin" || role === "business_owner") {
     await notifyWelcome(created.user);
   } else {
     const agency = await getAgency(agencyId);

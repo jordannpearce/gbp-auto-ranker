@@ -16,7 +16,9 @@ export function IntakeForm({
   assignment?: {
     agencies: Agency[];
     users: PublicUser[];
+    owners?: PublicUser[];
     defaultAgencyId?: string;
+    defaultOwnerUserId?: string;
   };
 }) {
   return (
@@ -26,8 +28,25 @@ export function IntakeForm({
         <FormSection
           eyebrow="Assignment"
           title="Who owns this campaign?"
-          copy="Leave unassigned to keep it in the admin queue, or give it to an agency now."
+          copy="Assign an agency, a business owner, or leave the listing in the admin queue."
         >
+          {assignment.owners ? (
+            <Field label="Business owner" htmlFor="ownerUserId">
+              <select
+                id="ownerUserId"
+                name="ownerUserId"
+                defaultValue={assignment.defaultOwnerUserId || ""}
+                className={selectClassName}
+              >
+                <option value="">No business login</option>
+                {assignment.owners.map((owner) => (
+                  <option key={owner.id} value={owner.id}>
+                    {owner.name} · {owner.email}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
           <Field label="Agency" htmlFor="agencyId">
             <select
               id="agencyId"
@@ -52,7 +71,11 @@ export function IntakeForm({
             >
               <option value="">Whole agency</option>
               {assignment.users
-                .filter((item) => item.role !== "admin")
+                .filter(
+                  (item) =>
+                    item.role === "agency_owner" ||
+                    item.role === "agency_member",
+                )
                 .map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
