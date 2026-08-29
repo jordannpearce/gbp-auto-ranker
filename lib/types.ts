@@ -27,9 +27,55 @@ export type User = {
   passwordHash: string;
   role: UserRole;
   agencyId: string;
+  emailVerifiedAt: string;
+  confirmToken: string;
+  confirmExpiresAt: string;
 };
 
-export type PublicUser = Omit<User, "passwordHash">;
+export type PublicUser = Omit<
+  User,
+  "passwordHash" | "confirmToken" | "confirmExpiresAt"
+>;
+
+export const EMAIL_KINDS = [
+  "confirm_account",
+  "welcome",
+  "password_reset",
+  "password_changed",
+  "team_invite",
+  "campaign_received",
+  "new_intake",
+  "campaign_assigned",
+  "client_assigned",
+  "marketing",
+  "info",
+  "update",
+] as const;
+
+export type EmailKind = (typeof EMAIL_KINDS)[number];
+
+export const BROADCAST_KINDS = ["marketing", "info", "update"] as const;
+export type BroadcastKind = (typeof BROADCAST_KINDS)[number];
+
+export const EMAIL_AUDIENCES = [
+  "all_users",
+  "agency_owners",
+  "agency_members",
+  "customers",
+  "custom",
+] as const;
+export type EmailAudience = (typeof EMAIL_AUDIENCES)[number];
+
+export type EmailLog = {
+  id: string;
+  createdAt: string;
+  kind: EmailKind;
+  to: string;
+  subject: string;
+  status: "sent" | "logged" | "failed";
+  error?: string;
+  resendId?: string;
+};
 
 export type Agency = {
   id: string;

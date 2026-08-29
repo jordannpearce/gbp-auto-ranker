@@ -1,8 +1,9 @@
 import { getCurrentUser } from "@/lib/auth";
 import { canManageTeam } from "@/lib/access";
 import { redirectTo } from "@/lib/http";
+import { notifyTeamInvite } from "@/lib/notify";
 import { isStrongPassword } from "@/lib/passwords";
-import { createUser } from "@/lib/users";
+import { createUser, getAgency } from "@/lib/users";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -41,11 +42,19 @@ export async function POST(request: Request) {
     password,
     role: "agency_member",
     agencyId,
+    verified: true,
   });
   if ("error" in created) {
     return redirectTo(
       `/dashboard/team?error=${encodeURIComponent(created.error ?? "Could not add that user.")}`,
     );
   }
+
+  const agency = await getAgency(agencyId);
+  await notifyTeamInvite({
+    user: created.user,
+    agencyName: agency?.name || "your agency",
+    invitedBy: user.name,
+  });
   return redirectTo("/dashboard/team?saved=1");
 }

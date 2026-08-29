@@ -1,4 +1,5 @@
 import { redirectTo } from "@/lib/http";
+import { notifyPasswordReset } from "@/lib/notify";
 import { createResetToken, getUserByEmail } from "@/lib/users";
 
 export async function POST(request: Request) {
@@ -11,5 +12,9 @@ export async function POST(request: Request) {
   }
 
   const reset = await createResetToken(user.id);
+  const sent = await notifyPasswordReset(user, reset.token);
+  if (sent.delivered) {
+    return redirectTo("/forgot-password?sent=1");
+  }
   return redirectTo(`/forgot-password?sent=1&token=${reset.token}`);
 }

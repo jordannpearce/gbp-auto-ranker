@@ -21,7 +21,8 @@ export async function middleware(request: NextRequest) {
   const isProtectedApi =
     (pathname.startsWith("/api/customers") && !isPublicIntake) ||
     pathname.startsWith("/api/agencies") ||
-    pathname.startsWith("/api/team");
+    pathname.startsWith("/api/team") ||
+    pathname.startsWith("/api/emails");
 
   if (!isDashboard && !isProtectedApi) {
     return NextResponse.next();
@@ -55,5 +56,7 @@ export const config = {
     "/api/agencies/:path*",
     "/api/team",
     "/api/team/:path*",
+    "/api/emails",
+    "/api/emails/:path*",
   ],
 };

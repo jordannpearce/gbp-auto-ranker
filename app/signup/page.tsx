@@ -20,7 +20,7 @@ export default async function SignupPage({
   return (
     <AuthCard
       title="Create an agency account"
-      copy="White-label GBP Auto Ranker for the businesses you manage. You can add more team users after you sign in."
+      copy="White-label GBP Auto Ranker for the businesses you manage. We’ll email a confirmation link before you can sign in."
     >
       <form action="/api/auth/signup" method="post" className="mt-6 space-y-4">
         <div>

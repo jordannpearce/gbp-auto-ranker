@@ -20,28 +20,28 @@ export default async function ForgotPasswordPage({
   return (
     <AuthCard
       title="Reset your password"
-      copy="Enter the email on the account. If it matches, we’ll create a reset link."
+      copy="Enter the email on the account. If it matches, we’ll send a one-hour reset link."
     >
       {sent ? (
         <div className="mt-6 space-y-3 text-sm">
           <p className="text-charcoal">
-            If that email is on file, a reset link is ready. Email delivery is
-            not configured on this host, so the link is shown here once.
+            If that email is on file, a reset link is on the way. Check spam if
+            you do not see it within a minute.
           </p>
           {token ? (
-            <p>
+            <div className="rounded-xl bg-surface px-4 py-3 leading-6">
+              <p>
+                Email delivery is not configured on this host, so the link is
+                shown here once.
+              </p>
               <Link
                 href={`/reset-password?token=${token}`}
-                className="font-medium text-primary hover:underline"
+                className="mt-2 inline-block font-medium text-primary hover:underline"
               >
                 Continue to reset password
               </Link>
-            </p>
-          ) : (
-            <p className="text-muted-foreground">
-              No account matched that email, or the link was already used.
-            </p>
-          )}
+            </div>
+          ) : null}
         </div>
       ) : (
         <form action="/api/auth/forgot" method="post" className="mt-6 space-y-4">

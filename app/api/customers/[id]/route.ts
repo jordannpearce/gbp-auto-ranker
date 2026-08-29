@@ -3,6 +3,7 @@ import { canSeeCustomer, isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { parseCustomerUpdate } from "@/lib/customers";
 import { redirectTo } from "@/lib/http";
+import { assignmentChanged, notifyAssignment } from "@/lib/notify";
 import { deleteCustomer, getCustomer, updateCustomer } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -70,6 +71,9 @@ export async function POST(
 
   const next = await updateCustomer(id, parsed.data);
   if (!next) return redirectTo("/dashboard");
+  if (assignmentChanged(customer, next) && next.agencyId) {
+    await notifyAssignment(next);
+  }
   return redirectTo(`/dashboard/${id}?saved=1`);
 }
 
@@ -88,6 +92,9 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
   const next = await updateCustomer(id, parsed.data);
+  if (next && assignmentChanged(customer, next) && next.agencyId) {
+    await notifyAssignment(next);
+  }
   return NextResponse.json({ customer: next });
 }
 

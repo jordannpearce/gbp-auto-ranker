@@ -1,9 +1,5 @@
-import {
-  COOKIE_NAME,
-  createSessionToken,
-  sessionCookieOptions,
-} from "@/lib/session";
 import { redirectTo } from "@/lib/http";
+import { notifyConfirmAccount } from "@/lib/notify";
 import { isStrongPassword } from "@/lib/passwords";
 import { createAgency } from "@/lib/users";
 
@@ -44,11 +40,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const response = redirectTo("/dashboard");
-  response.cookies.set(
-    COOKIE_NAME,
-    await createSessionToken(created.user.id),
-    sessionCookieOptions(),
-  );
-  return response;
+  const sent = await notifyConfirmAccount(created.user);
+  const params = new URLSearchParams({ email: created.user.email });
+  if (!sent.delivered && created.user.confirmToken) {
+    params.set("token", created.user.confirmToken);
+  }
+  return redirectTo(`/signup/check-email?${params.toString()}`);
 }

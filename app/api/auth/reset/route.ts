@@ -1,6 +1,7 @@
 import { redirectTo } from "@/lib/http";
+import { notifyPasswordChanged } from "@/lib/notify";
 import { isStrongPassword } from "@/lib/passwords";
-import { consumeResetToken, updateUserPassword } from "@/lib/users";
+import { consumeResetToken, getUser, updateUserPassword } from "@/lib/users";
 
 export async function POST(request: Request) {
   const form = await request.formData();
@@ -27,5 +28,9 @@ export async function POST(request: Request) {
   }
 
   await updateUserPassword(reset.userId, password);
+  const user = await getUser(reset.userId);
+  if (user) {
+    await notifyPasswordChanged(user);
+  }
   return redirectTo("/login?reset=1");
 }

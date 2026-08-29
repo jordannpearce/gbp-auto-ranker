@@ -16,10 +16,15 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string; scope?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    status?: string;
+    scope?: string;
+    confirmed?: string;
+  }>;
 }) {
   const { user, agency } = await loadDashboardUser();
-  const { q, status, scope } = await searchParams;
+  const { q, status, scope, confirmed } = await searchParams;
   const selectedStatus =
     status && CAMPAIGN_STATUSES.includes(status as CampaignStatus)
       ? (status as CampaignStatus)
@@ -47,6 +52,12 @@ export default async function DashboardPage({
               ? "Assign business listings to SEO agency accounts so their teams can white-label the campaign."
               : "These are the businesses assigned to your agency. Open a client to see the keywords and Maps listing you are ranking."}
           </p>
+          {confirmed ? (
+            <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              Email confirmed. Your agency account is ready to add clients and
+              team seats.
+            </p>
+          ) : null}
         </div>
         <DashboardView
           customers={customers}

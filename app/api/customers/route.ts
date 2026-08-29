@@ -3,6 +3,7 @@ import { isAgencyUser } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { parseCustomerInput } from "@/lib/customers";
 import { redirectTo } from "@/lib/http";
+import { notifyCampaignReceived } from "@/lib/notify";
 import { createCustomer, customerStats, listCustomers } from "@/lib/store";
 import { visibleCustomers } from "@/lib/access";
 
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
       : undefined;
 
   const customer = await createCustomer(parsed.data, extras);
+  await notifyCampaignReceived(customer);
   if (viaForm) {
     if (returnTo.startsWith("/dashboard")) {
       return redirectTo(`/dashboard/${customer.id}?saved=1`);

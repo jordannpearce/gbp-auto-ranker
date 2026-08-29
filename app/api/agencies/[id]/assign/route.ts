@@ -1,6 +1,7 @@
 import { isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { redirectTo } from "@/lib/http";
+import { notifyAssignment } from "@/lib/notify";
 import { getCustomer, updateCustomer } from "@/lib/store";
 import { getAgency } from "@/lib/users";
 
@@ -26,9 +27,12 @@ export async function POST(
     );
   }
 
-  await updateCustomer(customerId, {
+  const next = await updateCustomer(customerId, {
     agencyId: id,
     managerUserId,
   });
+  if (next) {
+    await notifyAssignment(next);
+  }
   return redirectTo(`/dashboard/agencies/${id}?saved=1`);
 }

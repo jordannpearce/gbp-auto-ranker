@@ -6,7 +6,7 @@ import {
 } from "@/lib/session";
 import { redirectTo } from "@/lib/http";
 import { verifyPassword } from "@/lib/passwords";
-import { getUserByEmail } from "@/lib/users";
+import { getUserByEmail, isEmailVerified } from "@/lib/users";
 
 function safeNext(value: string) {
   return value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
@@ -46,6 +46,18 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "That email or password does not match." },
       { status: 401 },
+    );
+  }
+
+  if (!isEmailVerified(user)) {
+    if (viaForm) {
+      return redirectTo(
+        `/login?unverified=1&email=${encodeURIComponent(user.email)}&next=${encodeURIComponent(next)}`,
+      );
+    }
+    return NextResponse.json(
+      { error: "Confirm your email before signing in." },
+      { status: 403 },
     );
   }
 

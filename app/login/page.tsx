@@ -17,9 +17,14 @@ export default async function LoginPage({
     error?: string;
     next?: string;
     reset?: string;
+    unverified?: string;
+    email?: string;
+    resent?: string;
+    token?: string;
   }>;
 }) {
-  const { error, next, reset } = await searchParams;
+  const { error, next, reset, unverified, email, resent, token } =
+    await searchParams;
 
   return (
     <AuthCard
@@ -38,6 +43,7 @@ export default async function LoginPage({
             required
             className="mt-2"
             placeholder="you@agency.com"
+            defaultValue={email || ""}
           />
         </div>
         <div>
@@ -65,6 +71,29 @@ export default async function LoginPage({
             That email or password does not match.
           </p>
         ) : null}
+        {unverified ? (
+          <div className="space-y-2 text-sm" role="alert">
+            <p className="text-red-600">
+              Confirm your email before signing in. Check your inbox, or resend
+              the link.
+            </p>
+            {token ? (
+              <p>
+                <Link
+                  href={`/api/auth/confirm?token=${token}`}
+                  className="font-medium text-primary hover:underline"
+                >
+                  Confirm this account
+                </Link>
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+        {resent ? (
+          <p className="text-sm text-emerald-700" role="status">
+            If that account still needs confirmation, a new email is on the way.
+          </p>
+        ) : null}
         {reset ? (
           <p className="text-sm text-emerald-700" role="status">
             Password updated. Sign in with the new one.
@@ -80,6 +109,18 @@ export default async function LoginPage({
           Sign in
         </button>
       </form>
+      {unverified ? (
+        <form action="/api/auth/resend-confirm" method="post" className="mt-4">
+          <input type="hidden" name="next" value="/login" />
+          <input type="hidden" name="email" value={email || ""} />
+          <button
+            type="submit"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Resend confirmation email
+          </button>
+        </form>
+      ) : null}
       <p className="mt-6 text-center text-sm text-muted-foreground">
         SEO agency?{" "}
         <Link href="/signup" className="font-medium text-primary hover:underline">

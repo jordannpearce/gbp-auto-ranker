@@ -24,8 +24,8 @@ export default async function SuccessPage() {
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
             Your listing, Maps link, and keywords are in the customer dashboard.
-            We’ll use exactly what you submitted to run searches and engagement
-            against the profile.
+            We’ll email a receipt to the address you submitted, then use exactly
+            those details to run searches and engagement against the profile.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link

@@ -17,6 +17,7 @@ export function DashboardHeader({
   ];
   if (isAdmin(user)) {
     links.push({ href: "/dashboard/agencies", label: "Agencies" });
+    links.push({ href: "/dashboard/emails", label: "Emails" });
   }
   if (canManageTeam(user) || user.agencyId) {
     links.push({ href: "/dashboard/team", label: "Team" });

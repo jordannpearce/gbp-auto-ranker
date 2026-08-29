@@ -120,10 +120,11 @@ export default async function TeamPage({
         ) : null}
 
         <section className="overflow-hidden rounded-2xl border border-border bg-white">
-          <div className="hidden grid-cols-[1.2fr_1.2fr_1fr_auto] gap-4 border-b border-border bg-surface px-5 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase md:grid">
+          <div className="hidden grid-cols-[1.2fr_1.2fr_1fr_0.8fr_auto] gap-4 border-b border-border bg-surface px-5 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase md:grid">
             <span>Name</span>
             <span>Email</span>
             <span>Role</span>
+            <span>Email status</span>
             <span>Added</span>
           </div>
           <ul className="divide-y divide-border">
@@ -132,11 +133,14 @@ export default async function TeamPage({
               .map((member) => (
                 <li
                   key={member.id}
-                  className="grid gap-1 px-5 py-4 md:grid-cols-[1.2fr_1.2fr_1fr_auto] md:items-center"
+                  className="grid gap-1 px-5 py-4 md:grid-cols-[1.2fr_1.2fr_1fr_0.8fr_auto] md:items-center"
                 >
                   <p className="font-medium text-charcoal">{member.name}</p>
                   <p className="text-sm text-muted-foreground">{member.email}</p>
                   <p className="text-sm">{roleLabel(member.role)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {member.emailVerifiedAt ? "Confirmed" : "Waiting"}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(member.createdAt)}
                   </p>

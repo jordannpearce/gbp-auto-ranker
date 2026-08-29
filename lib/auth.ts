@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { COOKIE_NAME, readSessionUserId } from "@/lib/session";
-import { getUser, toPublicUser } from "@/lib/users";
+import { getUser, isEmailVerified, toPublicUser } from "@/lib/users";
 
 export {
   COOKIE_NAME,
@@ -18,7 +18,8 @@ export async function getCurrentUser() {
   const userId = await readSessionUserId(token);
   if (!userId) return null;
   const user = await getUser(userId);
-  return user ? toPublicUser(user) : null;
+  if (!user || !isEmailVerified(user)) return null;
+  return toPublicUser(user);
 }
 
 export async function requireUser() {
