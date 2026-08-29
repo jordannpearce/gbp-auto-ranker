@@ -23,6 +23,8 @@ const RESETS_FILE = path.join(DATA_DIR, "resets.json");
 const CONFIRM_HOURS = 48;
 
 let writeChain: Promise<unknown> = Promise.resolve();
+let accountsReady = false;
+let bootAccounts: Promise<void> | null = null;
 
 function withLock<T>(fn: () => Promise<T>): Promise<T> {
   const run = writeChain.then(fn, fn);
@@ -133,47 +135,63 @@ async function migratePrimaryAdmin() {
 }
 
 async function ensureAccounts() {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  try {
-    await fs.access(USERS_FILE);
-  } catch {
-    const now = new Date().toISOString();
-    const adminHash = await hashPassword(PRIMARY_ADMIN_PASSWORD);
-    const verified = confirmFields(true, now);
-    const users: User[] = [
-      {
-        id: PRIMARY_ADMIN_ID,
-        createdAt: now,
-        name: PRIMARY_ADMIN_NAME,
-        email: PRIMARY_ADMIN_EMAIL,
-        passwordHash: adminHash,
-        role: "admin",
-        agencyId: "",
-        ...verified,
-      },
-    ];
-    await writeJson(USERS_FILE, users);
-    await writeJson(AGENCIES_FILE, []);
-    await writeJson(RESETS_FILE, []);
+  if (accountsReady) return;
+  if (!bootAccounts) {
+    bootAccounts = (async () => {
+      await fs.mkdir(DATA_DIR, { recursive: true });
+      try {
+        await fs.access(USERS_FILE);
+      } catch {
+        const now = new Date().toISOString();
+        const adminHash = await hashPassword(PRIMARY_ADMIN_PASSWORD);
+        const verified = confirmFields(true, now);
+        const users: User[] = [
+          {
+            id: PRIMARY_ADMIN_ID,
+            createdAt: now,
+            name: PRIMARY_ADMIN_NAME,
+            email: PRIMARY_ADMIN_EMAIL,
+            passwordHash: adminHash,
+            role: "admin",
+            agencyId: "",
+            ...verified,
+          },
+        ];
+        await writeJson(USERS_FILE, users);
+        await writeJson(AGENCIES_FILE, []);
+        await writeJson(RESETS_FILE, []);
+      }
+      await migratePrimaryAdmin();
+      await purgeDemoAccounts();
+      accountsReady = true;
+    })().catch((error) => {
+      bootAccounts = null;
+      throw error;
+    });
   }
-  await migratePrimaryAdmin();
-  await purgeDemoAccounts();
+  await bootAccounts;
 }
 
 async function purgeDemoAccounts() {
-  const users = (await readJson<Partial<User>[]>(USERS_FILE, []))
+  const rawUsers = await readJson<Partial<User>[]>(USERS_FILE, []);
+  const users = rawUsers
     .map((item) => normalizeUser(item))
-    .filter((item): item is User => Boolean(item))
-    .filter(
-      (user) =>
-        !DEMO_USER_IDS.includes(user.id) &&
-        !DEMO_AGENCY_IDS.includes(user.agencyId),
-    );
-  const agencies = (await readJson<Agency[]>(AGENCIES_FILE, [])).filter(
+    .filter((item): item is User => Boolean(item));
+  const keptUsers = users.filter(
+    (user) =>
+      !DEMO_USER_IDS.includes(user.id) &&
+      !DEMO_AGENCY_IDS.includes(user.agencyId),
+  );
+  const agencies = await readJson<Agency[]>(AGENCIES_FILE, []);
+  const keptAgencies = agencies.filter(
     (agency) => !DEMO_AGENCY_IDS.includes(agency.id),
   );
-  await writeJson(USERS_FILE, users);
-  await writeJson(AGENCIES_FILE, agencies);
+  if (keptUsers.length !== users.length) {
+    await writeJson(USERS_FILE, keptUsers);
+  }
+  if (keptAgencies.length !== agencies.length) {
+    await writeJson(AGENCIES_FILE, keptAgencies);
+  }
 }
 
 async function readUsers() {
