@@ -1,5 +1,9 @@
 import { redirectTo } from "@/lib/http";
-import { notifyConfirmAccount } from "@/lib/notify";
+import {
+  notifyConfirmAccount,
+  notifyStaffAgencySignup,
+  notifyStaffBusinessSignup,
+} from "@/lib/notify";
 import { isStrongPassword } from "@/lib/passwords";
 import { createAgency, createUser } from "@/lib/users";
 
@@ -37,6 +41,7 @@ export async function POST(request: Request) {
         errorUrl(created.error ?? "Could not create the account."),
       );
     }
+    await notifyStaffBusinessSignup(created.user);
     const sent = await notifyConfirmAccount(created.user);
     const params = new URLSearchParams({ email: created.user.email });
     if (!sent.delivered && created.user.confirmToken) {
@@ -65,6 +70,7 @@ export async function POST(request: Request) {
     return redirectTo(errorUrl(created.error ?? "Could not create the agency."));
   }
 
+  await notifyStaffAgencySignup(created);
   const sent = await notifyConfirmAccount(created.user);
   const params = new URLSearchParams({ email: created.user.email });
   if (!sent.delivered && created.user.confirmToken) {

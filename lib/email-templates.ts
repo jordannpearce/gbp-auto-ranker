@@ -239,16 +239,16 @@ export function clientAssignedManagerEmail(input: {
   agencyName: string;
   dashboardUrl: string;
 }) {
-  const subject = `New client assigned: ${input.businessName}`;
+  const subject = `New lead assigned: ${input.businessName}`;
   return {
     subject,
     text: `Hi ${input.managerName},\n\n${input.businessName} was assigned to ${input.agencyName}. Open the client in the dashboard:\n\n${input.dashboardUrl}`,
     html: brandEmail({
       preheader: `${input.businessName} is on your client book.`,
-      heading: "New client assigned",
-      intro: `Hi ${input.managerName}, ${input.businessName} was assigned to ${input.agencyName}.`,
+      heading: "New lead assigned",
+      intro: `Hi ${input.managerName}, a new business was assigned to ${input.agencyName}: ${input.businessName}.`,
       bodyHtml:
-        "<p style=\"margin:0 0 16px;font-size:16px;line-height:1.6;color:#17191D;\">Review the Maps URL and keywords before the campaign moves to active.</p>",
+        "<p style=\"margin:0 0 16px;font-size:16px;line-height:1.6;color:#17191D;\">Open the listing, review the Maps URL and keywords, and follow up with the owner.</p>",
       ctaLabel: "Open client",
       ctaUrl: input.dashboardUrl,
     }),

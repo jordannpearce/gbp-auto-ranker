@@ -13,7 +13,7 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 - Admin and agency users can delete duplicate client listings; admins can delete duplicate agencies (listings stay and become unassigned)
 - Session analytics on public website pages only (not the signed-in dashboard)
 - Email/password login, forgot-password reset, and signup for agencies or business owners
-- Transactional and broadcast email through [Resend](https://resend.com): confirmations, welcome, resets, intake receipts, assignment notices, team invites, plus admin marketing/info/update emails
+- Transactional and broadcast email through [Resend](https://resend.com): confirmations, welcome, resets, intake receipts, assignment notices, team invites, staff alerts on new agency/business signups, plus admin marketing/info/update emails
 - Admin Emails page to save the Resend API key, from-address, and editable templates
 - Admin dashboard: add agencies, users, and customers; assign listings to agencies or business owners
 - Agency dashboard: add their own clients, manage team seats, and run campaigns

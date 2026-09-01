@@ -29,10 +29,9 @@ export default function EmailPolicyPage() {
       <h2>Campaign email</h2>
       <p>
         After you submit a listing we send a receipt to the contact email on
-        the form. If that campaign is assigned to an agency, we may email the
-        business contact and the assigned teammate so both sides know who is
-        handling the work. These messages are about a campaign you asked us
-        to run.
+        the form. If that campaign or business is assigned to an agency, we
+        email the business contact and the agency team so they can follow up
+        on the lead. These messages are about a campaign you asked us to run.
       </p>
 
       <h2>Updates and marketing</h2>

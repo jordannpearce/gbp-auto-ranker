@@ -1,7 +1,29 @@
 import { renderBroadcastEmail, renderStoredEmail } from "@/lib/email-content";
 import { appUrl, sendEmail } from "@/lib/mail";
-import type { BroadcastKind, Customer, User } from "@/lib/types";
-import { getAgency, getUser, listUsers } from "@/lib/users";
+import {
+  PRIMARY_ADMIN_EMAIL,
+  PRIMARY_ADMIN_NAME,
+  STAFF_ALERT_EMAIL,
+} from "@/lib/primary-admin";
+import type { Agency, BroadcastKind, Customer, User } from "@/lib/types";
+import { getAgency, getUser, listAgencyUsers, listUsers } from "@/lib/users";
+
+async function staffAlertEmails() {
+  const admins = (await listUsers()).filter((user) => user.role === "admin");
+  return [
+    ...new Set(
+      [PRIMARY_ADMIN_EMAIL, STAFF_ALERT_EMAIL, ...admins.map((user) => user.email)]
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+}
+
+function staffGreeting(email: string) {
+  return email === PRIMARY_ADMIN_EMAIL.toLowerCase()
+    ? PRIMARY_ADMIN_NAME
+    : "team";
+}
 
 export async function notifyConfirmAccount(user: User) {
   if (!user.confirmToken) {
@@ -76,18 +98,15 @@ export async function notifyCampaignReceived(
   }
 
   if (options?.notifyAdmins !== false && !customer.agencyId) {
-    const admins = (await listUsers()).filter((user) => user.role === "admin");
-    for (const admin of admins) {
+    for (const email of await staffAlertEmails()) {
       const content = await renderStoredEmail("new_intake", {
-        name: admin.name || "there",
+        name: staffGreeting(email),
         business_name: customer.businessName,
         contact_name: customer.contactName || "A new contact",
         contact_email: customer.email,
         dashboard_url: appUrl(`/dashboard/${customer.id}`),
       });
-      jobs.push(
-        sendEmail({ ...content, to: admin.email, kind: "new_intake" }),
-      );
+      jobs.push(sendEmail({ ...content, to: email, kind: "new_intake" }));
     }
   }
 
@@ -113,24 +132,73 @@ export async function notifyAssignment(customer: Customer) {
     });
   }
 
-  const manager = customer.managerUserId
-    ? await getUser(customer.managerUserId)
-    : null;
-  const owner = agency?.ownerUserId ? await getUser(agency.ownerUserId) : null;
-  const recipient = manager || owner;
-  if (!recipient) return;
+  const recipients = new Map<string, User>();
+  for (const member of await listAgencyUsers(customer.agencyId)) {
+    if (member.email) recipients.set(member.email.toLowerCase(), member);
+  }
+  if (agency?.ownerUserId) {
+    const owner = await getUser(agency.ownerUserId);
+    if (owner?.email) recipients.set(owner.email.toLowerCase(), owner);
+  }
+  if (customer.managerUserId) {
+    const manager = await getUser(customer.managerUserId);
+    if (manager?.email) recipients.set(manager.email.toLowerCase(), manager);
+  }
 
-  const content = await renderStoredEmail("client_assigned", {
-    name: recipient.name || "there",
-    business_name: customer.businessName,
-    agency_name: agencyName,
-    dashboard_url: appUrl(`/dashboard/${customer.id}`),
+  for (const recipient of recipients.values()) {
+    const content = await renderStoredEmail("client_assigned", {
+      name: recipient.name || "there",
+      business_name: customer.businessName,
+      agency_name: agencyName,
+      dashboard_url: appUrl(`/dashboard/${customer.id}`),
+    });
+    await sendEmail({
+      ...content,
+      to: recipient.email,
+      kind: "client_assigned",
+    });
+  }
+}
+
+export async function notifyStaffAgencySignup(input: {
+  user: User;
+  agency: Agency;
+}) {
+  const emails = await staffAlertEmails();
+  if (emails.length === 0) return;
+  const jobs = emails.map(async (email) => {
+    const content = await renderStoredEmail("new_agency_signup", {
+      name: input.user.name || "A new owner",
+      email: input.user.email,
+      agency_name: input.agency.name,
+      website: input.agency.website || "No website",
+      dashboard_url: appUrl(`/dashboard/agencies/${input.agency.id}`),
+    });
+    return sendEmail({
+      ...content,
+      to: email,
+      kind: "new_agency_signup",
+    });
   });
-  await sendEmail({
-    ...content,
-    to: recipient.email,
-    kind: "client_assigned",
+  return Promise.all(jobs);
+}
+
+export async function notifyStaffBusinessSignup(user: User) {
+  const emails = await staffAlertEmails();
+  if (emails.length === 0) return;
+  const jobs = emails.map(async (email) => {
+    const content = await renderStoredEmail("new_business_signup", {
+      name: user.name || "A new business owner",
+      email: user.email,
+      dashboard_url: appUrl("/dashboard"),
+    });
+    return sendEmail({
+      ...content,
+      to: email,
+      kind: "new_business_signup",
+    });
   });
+  return Promise.all(jobs);
 }
 
 export function assignmentChanged(

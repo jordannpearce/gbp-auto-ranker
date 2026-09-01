@@ -50,6 +50,8 @@ export const EMAIL_KINDS = [
   "team_invite",
   "campaign_received",
   "new_intake",
+  "new_agency_signup",
+  "new_business_signup",
   "campaign_assigned",
   "client_assigned",
   "marketing",

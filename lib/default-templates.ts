@@ -42,6 +42,14 @@ export const EMAIL_TEMPLATE_META: Record<
     label: "New intake (admin)",
     variables: ["name", "business_name", "contact_name", "contact_email", "dashboard_url"],
   },
+  new_agency_signup: {
+    label: "New agency signup (staff)",
+    variables: ["name", "email", "agency_name", "website", "dashboard_url"],
+  },
+  new_business_signup: {
+    label: "New business signup (staff)",
+    variables: ["name", "email", "dashboard_url"],
+  },
   campaign_assigned: {
     label: "Campaign assigned",
     variables: ["name", "business_name", "agency_name"],
@@ -129,6 +137,24 @@ export const DEFAULT_TEMPLATES: EmailTemplate[] = [
     variables: ["name", "business_name", "contact_name", "contact_email", "dashboard_url"],
   },
   {
+    kind: "new_agency_signup",
+    label: "New agency signup (staff)",
+    subject: "New agency signup: {{agency_name}}",
+    heading: "New agency signup",
+    body: "{{name}} created an agency account for {{agency_name}}.\n\nEmail: {{email}}\nWebsite: {{website}}",
+    ctaLabel: "Open agency",
+    variables: ["name", "email", "agency_name", "website", "dashboard_url"],
+  },
+  {
+    kind: "new_business_signup",
+    label: "New business signup (staff)",
+    subject: "New business signup: {{name}}",
+    heading: "New business signup",
+    body: "{{name}} created a business-owner account.\n\nEmail: {{email}}",
+    ctaLabel: "Open dashboard",
+    variables: ["name", "email", "dashboard_url"],
+  },
+  {
     kind: "campaign_assigned",
     label: "Campaign assigned",
     subject: "{{business_name}} is with {{agency_name}}",
@@ -140,9 +166,9 @@ export const DEFAULT_TEMPLATES: EmailTemplate[] = [
   {
     kind: "client_assigned",
     label: "Client assigned",
-    subject: "New client assigned: {{business_name}}",
-    heading: "New client assigned",
-    body: "Hi {{name}},\n\n{{business_name}} was assigned to {{agency_name}}.\n\nReview the Maps URL and keywords before the campaign moves to active.",
+    subject: "New lead assigned: {{business_name}}",
+    heading: "New lead assigned",
+    body: "Hi {{name}},\n\nA new business was assigned to {{agency_name}}: {{business_name}}.\n\nOpen the listing, review the Maps URL and keywords, and follow up with the owner.",
     ctaLabel: "Open client",
     variables: ["name", "business_name", "agency_name", "dashboard_url"],
   },
