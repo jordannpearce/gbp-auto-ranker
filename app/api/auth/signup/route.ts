@@ -5,6 +5,7 @@ import {
   notifyStaffBusinessSignup,
 } from "@/lib/notify";
 import { isStrongPassword } from "@/lib/passwords";
+import { normalizeLeadPreference } from "@/lib/leads";
 import { createAgency, createUser } from "@/lib/users";
 
 export async function POST(request: Request) {
@@ -65,6 +66,7 @@ export async function POST(request: Request) {
     ownerName,
     email,
     password,
+    leadPreference: normalizeLeadPreference(form.get("leadPreference")),
   });
   if ("error" in created) {
     return redirectTo(errorUrl(created.error ?? "Could not create the agency."));

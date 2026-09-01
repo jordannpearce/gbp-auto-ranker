@@ -3,6 +3,7 @@ import { NotifyAgencyField } from "@/components/notify-agency-field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { agencyAssignLabel } from "@/lib/leads";
 import type { Agency, PublicUser } from "@/lib/types";
 import { PRIMARY_GOALS } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -63,7 +64,7 @@ export function IntakeForm({
               <option value="">Unassigned</option>
               {assignment.agencies.map((agency) => (
                 <option key={agency.id} value={agency.id}>
-                  {agency.name}
+                  {agencyAssignLabel(agency)}
                 </option>
               ))}
             </select>

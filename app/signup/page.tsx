@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AuthCard } from "@/components/auth-card";
+import { LeadPreferenceField } from "@/components/lead-preference-field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,6 +80,7 @@ export default async function SignupPage({
                 placeholder="https://youragency.com"
               />
             </div>
+            <LeadPreferenceField />
           </>
         )}
         <div>

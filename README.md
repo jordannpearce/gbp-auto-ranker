@@ -16,7 +16,7 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 - Transactional and broadcast email through [Resend](https://resend.com): confirmations, welcome, resets, intake receipts, assignment notices, team invites, staff alerts on new agency/business signups, plus admin marketing/info/update emails
 - Admin Emails page to save the Resend API key, from-address, and editable templates
 - Admin dashboard: add agencies, users, and customers; assign listings to agencies or business owners
-- Agency dashboard: add their own clients, manage team seats, and run campaigns
+- Agency dashboard: add their own clients, manage team seats, choose exclusive or shared leads, and run campaigns
 - Business-owner dashboard: add and manage multiple locations on one login
 - Postgres on Railway for accounts, customers, and the email log, with JSON files as a local fallback
 
@@ -25,7 +25,7 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 | Role | What they see |
 | --- | --- |
 | Admin | Every customer. Manually adds agencies, users, and customers, then assigns listings to an agency or a business owner. Can delete duplicate listings or agencies. |
-| Agency owner | Agency clients, team roster, ability to add users and new clients, and ability to delete a duplicate client listing. |
+| Agency owner | Agency clients, team roster, exclusive or shared lead preference, ability to add users and new clients, and ability to delete a duplicate client listing. |
 | Agency user | The same client book, plus the ability to add clients for that agency and delete a duplicate listing. |
 | Business owner | Their locations only. Can add more listings on the same account. |
 
@@ -53,7 +53,8 @@ Open [http://127.0.0.1:4410](http://127.0.0.1:4410).
 | `/dashboard/clients/new` | Add a customer or location |
 | `/dashboard/agencies/new` | Admin creates an agency and owner login |
 | `/dashboard/team` | Add users (admins, owners, or agency seats) |
-| `/dashboard/emails` | Admin Resend settings, templates, composer, and send log |
+| `/dashboard/emails` | Admin Resend settings, templates, composer, test send, and send log |
+| `/dashboard/agency` | Agency lead preference (exclusive or shared) |
 
 Without `DATABASE_URL`, records are written to `data/*.json`. With Postgres, the same tables are used. First boot creates the operator admin only — no sample clients or agencies.
 

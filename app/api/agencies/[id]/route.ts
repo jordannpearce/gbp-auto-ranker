@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/access";
+import { canEditAgency, isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { redirectTo } from "@/lib/http";
+import { parseLeadPreference } from "@/lib/leads";
 import { unassignAgencyCustomers } from "@/lib/store";
-import { deleteAgency, getAgency } from "@/lib/users";
+import { deleteAgency, getAgency, updateAgency } from "@/lib/users";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +26,27 @@ export async function POST(
   if (!agency) return redirectTo("/dashboard/agencies");
 
   const form = await request.formData();
-  if (String(form.get("intent") ?? "") !== "delete") {
-    return redirectTo(`/dashboard/agencies/${id}`);
+  const intent = String(form.get("intent") ?? "");
+  const ownerReturn = `/dashboard/agency`;
+  const adminReturn = `/dashboard/agencies/${id}`;
+  const returnTo = isAdmin(user) ? adminReturn : ownerReturn;
+
+  if (intent === "save") {
+    if (!canEditAgency(user, id)) {
+      return redirectTo("/dashboard");
+    }
+    const leadPreference = parseLeadPreference(form.get("leadPreference"));
+    if (!leadPreference) {
+      return redirectTo(
+        `${returnTo}?error=${encodeURIComponent("Choose exclusive or shared leads.")}`,
+      );
+    }
+    await updateAgency(id, { leadPreference });
+    return redirectTo(`${returnTo}?preference=1`);
+  }
+
+  if (intent !== "delete") {
+    return redirectTo(adminReturn);
   }
   if (!confirmedDuplicate(form)) {
     return redirectTo(

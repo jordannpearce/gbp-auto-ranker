@@ -56,7 +56,7 @@ export default async function DashboardPage({
               ? "Each row is a listing. The Agency column shows who is running it. A business-owner login only shows here after a listing is attached to them."
               : isBusinessOwner(user)
                 ? "Each location is a Google Business Profile you want in the map pack. Add another when you open a second shop."
-                : "These are the businesses assigned to your agency. Add a client or open one to see the keywords and Maps listing."}
+                : `These are the businesses assigned to your agency. You asked for ${agency?.leadPreference === "shared" ? "shared" : "exclusive"} leads — change that under Agency. Add a client or open one to see the keywords and Maps listing.`}
           </p>
           {confirmed ? (
             <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">

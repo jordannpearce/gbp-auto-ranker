@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { LeadPreferenceField } from "@/components/lead-preference-field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -102,6 +103,7 @@ export default async function NewAgencyPage({
               placeholder="At least 8 characters"
             />
           </div>
+          <LeadPreferenceField />
           {error ? (
             <p className="text-sm text-red-600" role="alert">
               {error}

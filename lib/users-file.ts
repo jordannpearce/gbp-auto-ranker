@@ -9,8 +9,10 @@ import {
   PRIMARY_ADMIN_NAME,
   PRIMARY_ADMIN_PASSWORD,
 } from "@/lib/primary-admin";
+import { normalizeAgency, normalizeLeadPreference } from "@/lib/leads";
 import type {
   Agency,
+  LeadPreference,
   PasswordReset,
   PublicUser,
   User,
@@ -182,7 +184,9 @@ async function purgeDemoAccounts() {
       !DEMO_USER_IDS.includes(user.id) &&
       !DEMO_AGENCY_IDS.includes(user.agencyId),
   );
-  const agencies = await readJson<Agency[]>(AGENCIES_FILE, []);
+  const agencies = (await readJson<Partial<Agency>[]>(AGENCIES_FILE, []))
+    .map((item) => normalizeAgency(item))
+    .filter((item): item is Agency => Boolean(item));
   const keptAgencies = agencies.filter(
     (agency) => !DEMO_AGENCY_IDS.includes(agency.id),
   );
@@ -322,9 +326,16 @@ export async function confirmUserByToken(token: string) {
   });
 }
 
-export async function listAgencies() {
+async function readAgencies() {
   await ensureAccounts();
-  return readJson<Agency[]>(AGENCIES_FILE, []);
+  const raw = await readJson<Partial<Agency>[]>(AGENCIES_FILE, []);
+  return raw
+    .map((item) => normalizeAgency(item))
+    .filter((item): item is Agency => Boolean(item));
+}
+
+export async function listAgencies() {
+  return readAgencies();
 }
 
 export async function getAgency(id: string) {
@@ -339,11 +350,12 @@ export async function createAgency(input: {
   email: string;
   password: string;
   verified?: boolean;
+  leadPreference?: LeadPreference;
 }) {
   return withLock(async () => {
     await ensureAccounts();
     const users = await readUsers();
-    const agencies = await readJson<Agency[]>(AGENCIES_FILE, []);
+    const agencies = await readAgencies();
     const email = input.email.trim().toLowerCase();
     if (users.some((user) => user.email.toLowerCase() === email)) {
       return { error: "An account with that email already exists." as const };
@@ -366,6 +378,7 @@ export async function createAgency(input: {
       name: input.name.trim(),
       website: input.website.trim(),
       ownerUserId: user.id,
+      leadPreference: normalizeLeadPreference(input.leadPreference),
     };
     users.push(user);
     agencies.push(agency);
@@ -378,7 +391,7 @@ export async function createAgency(input: {
 export async function deleteAgency(id: string) {
   return withLock(async () => {
     await ensureAccounts();
-    const agencies = await readJson<Agency[]>(AGENCIES_FILE, []);
+    const agencies = await readAgencies();
     const nextAgencies = agencies.filter((agency) => agency.id !== id);
     if (nextAgencies.length === agencies.length) return false;
     const users = await readUsers();
@@ -398,6 +411,33 @@ export async function deleteAgency(id: string) {
     await writeJson(AGENCIES_FILE, nextAgencies);
     await writeJson(RESETS_FILE, resets);
     return true;
+  });
+}
+
+export async function updateAgency(
+  id: string,
+  update: Partial<Pick<Agency, "name" | "website" | "leadPreference">>,
+) {
+  return withLock(async () => {
+    await ensureAccounts();
+    const agencies = await readAgencies();
+    const index = agencies.findIndex((agency) => agency.id === id);
+    if (index === -1) return null;
+    const next: Agency = {
+      ...agencies[index],
+      name: update.name?.trim() || agencies[index].name,
+      website:
+        update.website !== undefined
+          ? update.website.trim()
+          : agencies[index].website,
+      leadPreference:
+        update.leadPreference !== undefined
+          ? normalizeLeadPreference(update.leadPreference)
+          : agencies[index].leadPreference,
+    };
+    agencies[index] = next;
+    await writeJson(AGENCIES_FILE, agencies);
+    return next;
   });
 }
 

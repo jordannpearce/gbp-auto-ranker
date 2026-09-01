@@ -37,6 +37,9 @@ export function DashboardHeader({
       label: isAdmin(user) ? "Users" : "Team",
     });
   }
+  if (!isAdmin(user) && user.agencyId && !isBusinessOwner(user)) {
+    links.push({ href: "/dashboard/agency", label: "Agency" });
+  }
 
   return (
     <header className="border-b border-border bg-white">

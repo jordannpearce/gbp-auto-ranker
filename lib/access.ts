@@ -19,6 +19,14 @@ export function canManageTeam(user: Pick<User, "role">) {
   return user.role === "admin" || user.role === "agency_owner";
 }
 
+export function canEditAgency(
+  user: Pick<User, "role" | "agencyId">,
+  agencyId: string,
+) {
+  if (isAdmin(user)) return true;
+  return user.role === "agency_owner" && user.agencyId === agencyId;
+}
+
 export function canSeeCustomer(
   user: Pick<User, "role" | "agencyId" | "id">,
   customer: Pick<Customer, "agencyId" | "ownerUserId">,

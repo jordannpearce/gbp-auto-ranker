@@ -6,6 +6,7 @@ import { isAdmin } from "@/lib/access";
 import { loadDashboardUser } from "@/lib/dashboard";
 import { formatDate } from "@/lib/format";
 import { listCustomers } from "@/lib/store";
+import { leadPreferenceShort } from "@/lib/leads";
 import { listAgencies, listUsers } from "@/lib/users";
 
 export const metadata: Metadata = {
@@ -35,7 +36,7 @@ export default async function AgenciesPage() {
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
               Add an agency yourself, or open one to assign customers, see
-              their users, or remove a duplicate.
+              their exclusive or shared lead preference, or remove a duplicate.
             </p>
           </div>
           <Link
@@ -53,9 +54,10 @@ export default async function AgenciesPage() {
             </p>
           ) : (
             <>
-          <div className="hidden grid-cols-[1.4fr_1fr_auto_auto_auto] gap-4 border-b border-border bg-surface px-5 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase md:grid">
+          <div className="hidden grid-cols-[1.4fr_1fr_auto_auto_auto_auto] gap-4 border-b border-border bg-surface px-5 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase md:grid">
             <span>Agency</span>
             <span>Owner</span>
+            <span>Leads</span>
             <span>Users</span>
             <span>Clients</span>
             <span>Added</span>
@@ -73,7 +75,7 @@ export default async function AgenciesPage() {
                 <li key={item.id}>
                   <Link
                     href={`/dashboard/agencies/${item.id}`}
-                    className="grid gap-1 px-5 py-4 transition-colors hover:bg-accent/60 md:grid-cols-[1.4fr_1fr_auto_auto_auto] md:items-center"
+                    className="grid gap-1 px-5 py-4 transition-colors hover:bg-accent/60 md:grid-cols-[1.4fr_1fr_auto_auto_auto_auto] md:items-center"
                   >
                     <div>
                       <p className="font-semibold text-charcoal">{item.name}</p>
@@ -82,6 +84,9 @@ export default async function AgenciesPage() {
                       </p>
                     </div>
                     <p className="text-sm">{owner?.name || "—"}</p>
+                    <p className="text-sm">
+                      {leadPreferenceShort(item.leadPreference)}
+                    </p>
                     <p className="text-sm">{userCount}</p>
                     <p className="text-sm">{clientCount}</p>
                     <p className="text-sm text-muted-foreground">

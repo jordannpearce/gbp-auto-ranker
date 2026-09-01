@@ -3,11 +3,16 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { LeadPreferenceField } from "@/components/lead-preference-field";
 import { NotifyAgencyField } from "@/components/notify-agency-field";
 import { selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
 import { isAdmin, roleLabel } from "@/lib/access";
 import { loadDashboardUser } from "@/lib/dashboard";
+import {
+  leadPreferenceCopy,
+  leadPreferenceLabel,
+} from "@/lib/leads";
 import { listCustomers } from "@/lib/store";
 import { getAgency, listAgencyUsers } from "@/lib/users";
 import { cn } from "@/lib/utils";
@@ -28,12 +33,17 @@ export default async function AgencyDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string; created?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    saved?: string;
+    created?: string;
+    preference?: string;
+  }>;
 }) {
   const { user, agency: currentAgency } = await loadDashboardUser();
   if (!isAdmin(user)) redirect("/dashboard");
   const { id } = await params;
-  const { error, saved, created } = await searchParams;
+  const { error, saved, created, preference } = await searchParams;
   const agency = await getAgency(id);
   if (!agency) notFound();
 
@@ -59,8 +69,8 @@ export default async function AgencyDetailPage({
             {agency.name}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Assign unassigned business customers to this agency and pick the
-            user who will manage each one.
+            {leadPreferenceLabel(agency.leadPreference)} ·{" "}
+            {leadPreferenceCopy(agency.leadPreference)}
           </p>
           {created ? (
             <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -91,6 +101,38 @@ export default async function AgencyDetailPage({
             </Link>
           </div>
         </div>
+
+        <section className="rounded-2xl border border-border bg-white p-6">
+          <h2 className="text-base font-semibold text-charcoal">
+            Lead preference
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The agency owner can also change this from their Agency settings.
+            Use it when you decide whether a listing should stay exclusive.
+          </p>
+          <form
+            action={`/api/agencies/${agency.id}`}
+            method="post"
+            className="mt-4 space-y-4"
+          >
+            <input type="hidden" name="intent" value="save" />
+            <LeadPreferenceField defaultValue={agency.leadPreference} />
+            {preference ? (
+              <p className="text-sm text-emerald-700" role="status">
+                Lead preference saved.
+              </p>
+            ) : null}
+            <button
+              type="submit"
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-10 px-4 sm:w-fit",
+              )}
+            >
+              Save preference
+            </button>
+          </form>
+        </section>
 
         <section className="rounded-2xl border border-border bg-white p-6">
           <h2 className="text-base font-semibold text-charcoal">

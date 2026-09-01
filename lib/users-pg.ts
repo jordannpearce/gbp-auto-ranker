@@ -8,7 +8,8 @@ import {
   PRIMARY_ADMIN_NAME,
   PRIMARY_ADMIN_PASSWORD,
 } from "@/lib/primary-admin";
-import type { Agency, PasswordReset, User } from "@/lib/types";
+import { normalizeAgency, normalizeLeadPreference } from "@/lib/leads";
+import type { Agency, LeadPreference, PasswordReset, User } from "@/lib/types";
 import { normalizeUser } from "@/lib/users-file";
 
 const CONFIRM_HOURS = 48;
@@ -50,13 +51,18 @@ function mapUser(row: Record<string, unknown>): User {
 }
 
 function mapAgency(row: Record<string, unknown>): Agency {
-  return {
+  const agency = normalizeAgency({
     id: String(row.id),
     createdAt: iso(row.created_at as Date | string),
     name: String(row.name ?? ""),
     website: String(row.website ?? ""),
     ownerUserId: String(row.owner_user_id ?? ""),
-  };
+    leadPreference: normalizeLeadPreference(row.lead_preference),
+  });
+  if (!agency) {
+    throw new Error("Could not read agency row.");
+  }
+  return agency;
 }
 
 async function insertUser(user: User) {
@@ -304,6 +310,7 @@ export async function createAgency(input: {
   email: string;
   password: string;
   verified?: boolean;
+  leadPreference?: LeadPreference;
 }) {
   await ensureAccounts();
   const email = input.email.trim().toLowerCase();
@@ -328,6 +335,7 @@ export async function createAgency(input: {
     name: input.name.trim(),
     website: input.website.trim(),
     ownerUserId: user.id,
+    leadPreference: normalizeLeadPreference(input.leadPreference),
   };
   try {
     await withTransaction(async (client) => {
@@ -350,9 +358,16 @@ export async function createAgency(input: {
         ],
       );
       await client.query(
-        `INSERT INTO agencies (id, created_at, name, website, owner_user_id)
-         VALUES ($1,$2,$3,$4,$5)`,
-        [agency.id, agency.createdAt, agency.name, agency.website, agency.ownerUserId],
+        `INSERT INTO agencies (id, created_at, name, website, owner_user_id, lead_preference)
+         VALUES ($1,$2,$3,$4,$5,$6)`,
+        [
+          agency.id,
+          agency.createdAt,
+          agency.name,
+          agency.website,
+          agency.ownerUserId,
+          agency.leadPreference,
+        ],
       );
     });
   } catch (error) {
@@ -380,6 +395,30 @@ export async function deleteAgency(id: string) {
     await client.query("DELETE FROM agencies WHERE id = $1", [id]);
   });
   return true;
+}
+
+export async function updateAgency(
+  id: string,
+  update: Partial<Pick<Agency, "name" | "website" | "leadPreference">>,
+) {
+  await ensureAccounts();
+  const agency = await getAgency(id);
+  if (!agency) return null;
+  const next: Agency = {
+    ...agency,
+    name: update.name?.trim() || agency.name,
+    website:
+      update.website !== undefined ? update.website.trim() : agency.website,
+    leadPreference:
+      update.leadPreference !== undefined
+        ? normalizeLeadPreference(update.leadPreference)
+        : agency.leadPreference,
+  };
+  await query(
+    `UPDATE agencies SET name = $2, website = $3, lead_preference = $4 WHERE id = $1`,
+    [id, next.name, next.website, next.leadPreference],
+  );
+  return next;
 }
 
 export async function createResetToken(userId: string) {

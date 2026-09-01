@@ -85,12 +85,16 @@ export type EmailLog = {
   resendId?: string;
 };
 
+export const LEAD_PREFERENCES = ["exclusive", "shared"] as const;
+export type LeadPreference = (typeof LEAD_PREFERENCES)[number];
+
 export type Agency = {
   id: string;
   createdAt: string;
   name: string;
   website: string;
   ownerUserId: string;
+  leadPreference: LeadPreference;
 };
 
 export type PasswordReset = {

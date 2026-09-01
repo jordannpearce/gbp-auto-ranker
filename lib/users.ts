@@ -64,6 +64,13 @@ export async function deleteAgency(id: string) {
   return repo().deleteAgency(id);
 }
 
+export async function updateAgency(
+  id: string,
+  update: Parameters<typeof file.updateAgency>[1],
+) {
+  return repo().updateAgency(id, update);
+}
+
 export async function createResetToken(userId: string) {
   return repo().createResetToken(userId);
 }

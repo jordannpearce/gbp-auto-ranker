@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { canDeleteCustomer, isAdmin, isBusinessOwner } from "@/lib/access";
 import { formatLocation, STATUS_LABELS } from "@/lib/customers";
+import { agencyAssignLabel } from "@/lib/leads";
 import { formatDateTime } from "@/lib/format";
 import type { Agency, PublicUser } from "@/lib/types";
 import { CAMPAIGN_STATUSES, type Customer } from "@/lib/types";
@@ -199,7 +200,7 @@ export function CustomerDetail({
                       <option value="">Unassigned</option>
                       {agencies.map((agency) => (
                         <option key={agency.id} value={agency.id}>
-                          {agency.name}
+                          {agencyAssignLabel(agency)}
                         </option>
                       ))}
                     </select>

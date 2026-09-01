@@ -1,6 +1,7 @@
 import { isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { redirectTo } from "@/lib/http";
+import { normalizeLeadPreference } from "@/lib/leads";
 import { notifyWelcome } from "@/lib/notify";
 import { isStrongPassword } from "@/lib/passwords";
 import { createAgency } from "@/lib/users";
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
     email,
     password,
     verified: true,
+    leadPreference: normalizeLeadPreference(form.get("leadPreference")),
   });
   if ("error" in created) {
     return redirectTo(

@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS agencies (
   created_at TIMESTAMPTZ NOT NULL,
   name TEXT NOT NULL,
   website TEXT NOT NULL DEFAULT '',
-  owner_user_id TEXT NOT NULL DEFAULT ''
+  owner_user_id TEXT NOT NULL DEFAULT '',
+  lead_preference TEXT NOT NULL DEFAULT 'exclusive'
 );
 
 CREATE TABLE IF NOT EXISTS password_resets (
@@ -89,6 +90,7 @@ CREATE INDEX IF NOT EXISTS email_logs_created_idx ON email_logs (created_at DESC
 const MIGRATIONS_SQL = `
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS owner_user_id TEXT NOT NULL DEFAULT '';
 CREATE INDEX IF NOT EXISTS customers_owner_idx ON customers (owner_user_id);
+ALTER TABLE agencies ADD COLUMN IF NOT EXISTS lead_preference TEXT NOT NULL DEFAULT 'exclusive';
 `;
 
 export function isPostgres() {
