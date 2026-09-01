@@ -1,7 +1,7 @@
 import { isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { renderBroadcastEmail, renderStoredEmail } from "@/lib/email-content";
-import { sampleEmailVars, varsForEmail } from "@/lib/email-vars";
+import { testEmailVars } from "@/lib/email-vars";
 import { redirectTo } from "@/lib/http";
 import { sendEmail } from "@/lib/mail";
 import { notifyBroadcast } from "@/lib/notify";
@@ -49,12 +49,7 @@ export async function POST(request: Request) {
       listCustomers(),
       listAgencies(),
     ]);
-    const known = varsForEmail(testTo, { users, customers, agencies });
-    const vars = sampleEmailVars({
-      ...known,
-      email: testTo,
-      name: known.name || "Jordan Hale",
-    });
+    const vars = testEmailVars(testTo, { users, customers, agencies });
 
     const templateKind = String(form.get("templateKind") ?? "") as EmailKind;
     const ctaRaw = form.get("ctaLabel");
@@ -91,6 +86,9 @@ export async function POST(request: Request) {
     if (result.delivered || result.status === "logged") {
       params.set("tested", "1");
       params.set("testTo", testTo);
+      params.set("testedSubject", content.subject);
+      params.set("testedAgency", vars.agency_name || vars.agency);
+      params.set("testedBusiness", vars.business_name || vars.business);
     } else {
       params.set(
         "error",

@@ -93,6 +93,9 @@ export default async function EmailsPage({
     compose?: string;
     tested?: string;
     testTo?: string;
+    testedSubject?: string;
+    testedAgency?: string;
+    testedBusiness?: string;
   }>;
 }) {
   const { user, agency } = await loadDashboardUser();
@@ -110,6 +113,9 @@ export default async function EmailsPage({
     compose,
     tested,
     testTo,
+    testedSubject,
+    testedAgency,
+    testedBusiness,
   } = params;
 
   const [logs, users, customers, mailSettings, templates, configured, from] =
@@ -155,9 +161,16 @@ export default async function EmailsPage({
               className="mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950"
               role="status"
             >
-              Test email sent to {testTo || "your inbox"}. Shortcodes were
-              filled with the recipient’s values when we know them, or sample
-              values so you can check the merge.
+              Test email sent to {testTo || "your inbox"}.
+              {testedSubject ? ` Subject after merge: ${testedSubject}.` : ""}
+              {testedAgency
+                ? ` {{agency}} became “${testedAgency}”.`
+                : ""}
+              {testedBusiness
+                ? ` {{business_name}} became “${testedBusiness}”.`
+                : ""}{" "}
+              If the test address is not on an agency, we use sample values so
+              the placeholders still fill.
             </p>
           ) : null}
           {error ? (

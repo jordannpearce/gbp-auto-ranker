@@ -61,20 +61,27 @@ export function expandEmailVars(input: Record<string, string>) {
   return next;
 }
 
+function lookupValue(lookup: Record<string, string>, raw: string) {
+  const key = normalizeKey(raw);
+  if (lookup[key]) return lookup[key];
+  const alias = ALIASES[key];
+  if (alias && lookup[alias]) return lookup[alias];
+  return "";
+}
+
 export function applyTemplateVars(
   text: string,
   vars: Record<string, string>,
 ) {
   const lookup: Record<string, string> = {};
   for (const [key, value] of Object.entries(expandEmailVars(vars))) {
-    lookup[normalizeKey(key)] = value;
+    if (value) lookup[normalizeKey(key)] = value;
   }
-  return text.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (match, raw: string) => {
-    const key = normalizeKey(raw);
-    if (lookup[key] !== undefined) return lookup[key];
-    const alias = ALIASES[key];
-    if (alias && lookup[alias] !== undefined) return lookup[alias];
-    return match;
+  for (const [alias, canon] of Object.entries(ALIASES)) {
+    if (lookup[canon] && !lookup[alias]) lookup[alias] = lookup[canon];
+  }
+  return text.replace(/\{\{\{?\s*([^}]+?)\s*\}?\}\}/g, (match, raw: string) => {
+    return lookupValue(lookup, raw) || match;
   });
 }
 
@@ -148,6 +155,15 @@ export function varsForEmail(email: string, context: EmailVarContext) {
     website: customer?.website || agency?.website || "",
     dashboard_url: appUrl("/dashboard"),
     login_url: appUrl("/login"),
+  });
+}
+
+export function testEmailVars(email: string, context: EmailVarContext) {
+  const known = varsForEmail(email, context);
+  return sampleEmailVars({
+    ...known,
+    email,
+    name: known.name || "Jordan Hale",
   });
 }
 
