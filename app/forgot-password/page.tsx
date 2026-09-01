@@ -13,26 +13,33 @@ export const metadata: Metadata = {
 export default async function ForgotPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sent?: string; token?: string }>;
+  searchParams: Promise<{ sent?: string; token?: string; error?: string; mailError?: string }>;
 }) {
-  const { sent, token } = await searchParams;
+  const { sent, token, error, mailError } = await searchParams;
 
   return (
     <AuthCard
       title="Reset your password"
       copy="Enter the email on the account. If it matches, we’ll send a one-hour reset link."
     >
+      {error ? (
+        <p className="mt-6 text-sm text-red-600" role="alert">
+          {error}
+        </p>
+      ) : null}
       {sent ? (
         <div className="mt-6 space-y-3 text-sm">
           <p className="text-charcoal">
-            If that email is on file, a reset link is on the way. Check spam if
-            you do not see it within a minute.
+            If that email belongs to an agency or business login, a reset link
+            is on the way. Check spam if you do not see it within a minute.
+            Listing contact emails only work when that address is also the
+            sign-in email.
           </p>
           {token ? (
             <div className="rounded-xl bg-surface px-4 py-3 leading-6">
               <p>
-                Email delivery is not configured on this host, so the link is
-                shown here once.
+                {mailError ||
+                  "The reset email could not be delivered from this host, so the link is shown here once."}
               </p>
               <Link
                 href={`/reset-password?token=${token}`}

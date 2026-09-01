@@ -54,16 +54,24 @@ export async function renderStoredEmail(
     kind === "marketing"
       ? "You’re receiving this because you have a GBP Auto Ranker account or campaign. Reply if you want off this list."
       : "GBP Auto Ranker · Map-pack ranking for Google Business Profiles";
+  const needsBareLink =
+    Boolean(ctaUrl) &&
+    (kind === "password_reset" || kind === "confirm_account") &&
+    !body.includes(ctaUrl);
+  const text = [heading, "", body, ctaUrl ? `\n${ctaUrl}` : ""]
+    .filter(Boolean)
+    .join("\n");
+  const linkHtml = needsBareLink
+    ? `<p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#5B6472;word-break:break-all;">If the button does not work, open this link:<br /><a href="${ctaUrl.replaceAll("&", "&amp;").replaceAll('"', "&quot;")}">${ctaUrl.replaceAll("&", "&amp;").replaceAll("<", "&lt;")}</a></p>`
+    : "";
 
   return {
     subject,
-    text: [heading, "", body, ctaUrl ? `\n${ctaUrl}` : ""]
-      .filter(Boolean)
-      .join("\n"),
+    text,
     html: brandEmail({
       preheader: subject,
       heading,
-      bodyHtml: paragraphsToHtml(body),
+      bodyHtml: `${paragraphsToHtml(body)}${linkHtml}`,
       ctaLabel: ctaLabel || undefined,
       ctaUrl: ctaLabel && ctaUrl ? ctaUrl : undefined,
       footer,

@@ -114,7 +114,7 @@ export const DEFAULT_TEMPLATES: EmailTemplate[] = [
     label: "Password reset",
     subject: "Reset your GBP Auto Ranker password",
     heading: "Reset your password",
-    body: "Hi {{name}},\n\nWe received a request to reset the password on this account. The link works once and expires in one hour.\n\nIf you did not ask for a reset, you can ignore this email.",
+    body: "Hi {{name}},\n\nWe received a request to reset the password on this account. The link works once and expires in one hour.\n\n{{reset_url}}\n\nIf you did not ask for a reset, you can ignore this email.",
     ctaLabel: "Choose a new password",
     variables: ["name", "reset_url"],
   },

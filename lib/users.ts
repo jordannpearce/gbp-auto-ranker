@@ -24,6 +24,17 @@ export async function getUserByEmail(email: string) {
   return repo().getUserByEmail(email);
 }
 
+export async function findUserForPasswordReset(email: string) {
+  const needle = email.trim().toLowerCase();
+  if (!needle.includes("@")) return null;
+  const direct = await getUserByEmail(needle);
+  if (direct) return direct;
+  const users = await listUsers();
+  return (
+    users.find((user) => user.email.trim().toLowerCase() === needle) ?? null
+  );
+}
+
 export async function listAgencyUsers(agencyId: string) {
   return repo().listAgencyUsers(agencyId);
 }

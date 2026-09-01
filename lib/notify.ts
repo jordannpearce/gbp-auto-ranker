@@ -53,9 +53,11 @@ export async function notifyWelcome(user: User) {
 }
 
 export async function notifyPasswordReset(user: User, token: string) {
+  const resetUrl = appUrl(`/reset-password?token=${encodeURIComponent(token)}`);
   const content = await renderStoredEmail("password_reset", {
     name: user.name || "there",
-    reset_url: appUrl(`/reset-password?token=${token}`),
+    email: user.email,
+    reset_url: resetUrl,
   });
   return sendEmail({ ...content, to: user.email, kind: "password_reset" });
 }
