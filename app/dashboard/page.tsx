@@ -53,7 +53,7 @@ export default async function DashboardPage({
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             {isAdmin(user)
-              ? "Add customers here, then assign them to an agency or a business owner."
+              ? "Each row is a listing. The Agency column shows who is running it. A business-owner login only shows here after a listing is attached to them."
               : isBusinessOwner(user)
                 ? "Each location is a Google Business Profile you want in the map pack. Add another when you open a second shop."
                 : "These are the businesses assigned to your agency. Add a client or open one to see the keywords and Maps listing."}

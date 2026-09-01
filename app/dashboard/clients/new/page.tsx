@@ -14,10 +14,10 @@ export const dynamic = "force-dynamic";
 export default async function NewClientPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; agencyId?: string }>;
+  searchParams: Promise<{ error?: string; agencyId?: string; ownerUserId?: string }>;
 }) {
   const { user, agency } = await loadDashboardUser();
-  const { error, agencyId } = await searchParams;
+  const { error, agencyId, ownerUserId } = await searchParams;
   const [agencies, users] = isAdmin(user)
     ? await Promise.all([listAgencies(), listUsers()])
     : [[], []];
@@ -50,6 +50,7 @@ export default async function NewClientPage({
                       (item) => item.role === "business_owner",
                     ),
                     defaultAgencyId: agencyId,
+                    defaultOwnerUserId: ownerUserId,
                   }
                 : undefined
             }

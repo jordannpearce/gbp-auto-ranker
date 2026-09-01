@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { canManageTeam, isAdmin, roleLabel } from "@/lib/access";
+import { attachmentLabel, listingsForUser } from "@/lib/attachments";
 import { loadDashboardUser } from "@/lib/dashboard";
 import { formatDate } from "@/lib/format";
+import { listCustomers } from "@/lib/store";
 import { listAgencies, listAgencyUsers, listUsers } from "@/lib/users";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +26,10 @@ export default async function TeamPage({
 }) {
   const { user, agency } = await loadDashboardUser();
   const { error, saved } = await searchParams;
-  const agencies = await listAgencies();
+  const [agencies, customers] = await Promise.all([
+    listAgencies(),
+    listCustomers(),
+  ]);
   const members = user.agencyId
     ? await listAgencyUsers(user.agencyId)
     : isAdmin(user)
@@ -40,7 +46,7 @@ export default async function TeamPage({
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             {isAdmin(user)
-              ? "Add admins, agency owners, agency users, and business owners. Owners can also add their own team seats."
+              ? "A user is a login. A customer is a listing. Business owners only appear on Customers after you add a listing and attach it to them."
               : "Add users so more people at the agency can manage the same client book."}
           </p>
         </div>
@@ -134,6 +140,12 @@ export default async function TeamPage({
               >
                 Add user
               </button>
+              {isAdmin(user) ? (
+                <p className="sm:col-span-2 text-xs leading-5 text-muted-foreground">
+                  Creating a business owner only creates their login. Add a
+                  listing and assign that owner so they show on Customers.
+                </p>
+              ) : null}
             </form>
           </section>
         ) : null}
@@ -149,37 +161,75 @@ export default async function TeamPage({
                 className={cn(
                   "hidden gap-4 border-b border-border bg-surface px-5 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase md:grid",
                   isAdmin(user)
-                    ? "grid-cols-[1.1fr_1.2fr_1fr_1fr_0.8fr_auto]"
-                    : "grid-cols-[1.2fr_1.2fr_1fr_0.8fr_auto]",
+                    ? "grid-cols-[1.1fr_1.2fr_0.9fr_1.1fr_1.4fr_0.8fr_auto]"
+                    : "grid-cols-[1.2fr_1.2fr_1fr_1.4fr_0.8fr_auto]",
                 )}
               >
                 <span>Name</span>
                 <span>Email</span>
                 <span>Role</span>
-                {isAdmin(user) ? <span>Agency</span> : null}
+                {isAdmin(user) ? <span>Agency / staff</span> : null}
+                <span>Listings</span>
                 <span>Email status</span>
                 <span>Added</span>
               </div>
               <ul className="divide-y divide-border">
-                {members.map((member) => (
+                {members.map((member) => {
+                  const listings = listingsForUser(member, customers);
+                  const attached = attachmentLabel(member, agencies);
+                  return (
                   <li
                     key={member.id}
                     className={cn(
-                      "grid gap-1 px-5 py-4 md:items-center",
+                      "grid gap-1 px-5 py-4 md:items-start",
                       isAdmin(user)
-                        ? "md:grid-cols-[1.1fr_1.2fr_1fr_1fr_0.8fr_auto]"
-                        : "md:grid-cols-[1.2fr_1.2fr_1fr_0.8fr_auto]",
+                        ? "md:grid-cols-[1.1fr_1.2fr_0.9fr_1.1fr_1.4fr_0.8fr_auto]"
+                        : "md:grid-cols-[1.2fr_1.2fr_1fr_1.4fr_0.8fr_auto]",
                     )}
                   >
                     <p className="font-medium text-charcoal">{member.name}</p>
                     <p className="text-sm text-muted-foreground">{member.email}</p>
                     <p className="text-sm">{roleLabel(member.role)}</p>
                     {isAdmin(user) ? (
-                      <p className="text-sm text-muted-foreground">
-                        {agencies.find((item) => item.id === member.agencyId)
-                          ?.name || "—"}
-                      </p>
+                      <p className="text-sm text-charcoal">{attached}</p>
                     ) : null}
+                    <div className="text-sm">
+                      {member.role === "admin" ? (
+                        <p className="text-muted-foreground">All customers</p>
+                      ) : listings.length === 0 ? (
+                        <p className="text-muted-foreground">
+                          {member.role === "business_owner"
+                            ? "No listings yet"
+                            : "No clients yet"}
+                        </p>
+                      ) : (
+                        <ul className="space-y-1">
+                          {listings.slice(0, 3).map((listing) => (
+                            <li key={listing.id}>
+                              <Link
+                                href={`/dashboard/${listing.id}`}
+                                className="font-medium text-primary hover:underline"
+                              >
+                                {listing.businessName}
+                              </Link>
+                            </li>
+                          ))}
+                          {listings.length > 3 ? (
+                            <li className="text-xs text-muted-foreground">
+                              +{listings.length - 3} more
+                            </li>
+                          ) : null}
+                        </ul>
+                      )}
+                      {isAdmin(user) && member.role === "business_owner" ? (
+                        <Link
+                          href={`/dashboard/clients/new?ownerUserId=${member.id}`}
+                          className="mt-1 inline-block text-xs font-medium text-primary hover:underline"
+                        >
+                          Add a listing
+                        </Link>
+                      ) : null}
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       {member.emailVerifiedAt ? "Confirmed" : "Waiting"}
                     </p>
@@ -187,7 +237,8 @@ export default async function TeamPage({
                       {formatDate(member.createdAt)}
                     </p>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </>
           )}
