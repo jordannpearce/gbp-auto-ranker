@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS agencies (
   created_at TIMESTAMPTZ NOT NULL,
   name TEXT NOT NULL,
   website TEXT NOT NULL DEFAULT '',
-  owner_user_id TEXT NOT NULL DEFAULT ''
+  owner_user_id TEXT NOT NULL DEFAULT '',
+  lead_preference TEXT NOT NULL DEFAULT 'exclusive'
 );
 
 CREATE TABLE IF NOT EXISTS password_resets (

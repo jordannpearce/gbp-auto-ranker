@@ -138,6 +138,11 @@ export default async function AgencyDetailPage({
           <h2 className="text-base font-semibold text-charcoal">
             Assign a customer
           </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {agency.leadPreference === "exclusive"
+              ? "This agency asked for exclusive leads. Assign listings they will run alone."
+              : "This agency accepts shared leads — listings that may also be offered to other agencies."}
+          </p>
           <form
             action={`/api/agencies/${agency.id}/assign`}
             method="post"
