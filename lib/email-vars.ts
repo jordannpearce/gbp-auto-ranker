@@ -78,13 +78,23 @@ export function applyTemplateVars(
   });
 }
 
+function filledVars(input: Record<string, string>) {
+  const next: Record<string, string> = {};
+  for (const [key, value] of Object.entries(input)) {
+    if (value) next[key] = value;
+  }
+  return next;
+}
+
 export function sampleEmailVars(overrides: Record<string, string> = {}) {
   return expandEmailVars({
     name: "Jordan Hale",
     email: "jordan@example.com",
     agency_name: "North Shore SEO",
+    agency: "North Shore SEO",
     agency_owner: "Alex Rivera",
     business_name: "Harbor Grill",
+    business: "Harbor Grill",
     contact_name: "Jamie Cole",
     contact_email: "jamie@harborgrill.example",
     website: "https://harborgrill.example",
@@ -93,7 +103,7 @@ export function sampleEmailVars(overrides: Record<string, string> = {}) {
     confirm_url: appUrl("/api/auth/confirm?token=preview"),
     reset_url: appUrl("/reset-password?token=preview"),
     invited_by: "TM",
-    ...overrides,
+    ...filledVars(overrides),
   });
 }
 

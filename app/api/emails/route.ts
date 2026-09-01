@@ -111,7 +111,7 @@ export async function POST(request: Request) {
 
   if (!BROADCAST_KINDS.includes(kind as BroadcastKind)) {
     return redirectTo(
-      `/dashboard/emails?error=${encodeURIComponent("Choose marketing, info, or update.")}`,
+      `/dashboard/emails?error=${encodeURIComponent("Choose new client for agency, marketing, info, or a product update.")}`,
     );
   }
   if (!EMAIL_AUDIENCES.includes(audience)) {

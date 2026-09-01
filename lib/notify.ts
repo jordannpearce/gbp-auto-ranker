@@ -175,18 +175,20 @@ export async function notifyAssignment(
   }
 
   for (const recipient of recipients.values()) {
-    const content = await renderStoredEmail("client_assigned", {
+    const content = await renderStoredEmail("agency_new_client", {
       name: recipient.name || "there",
       email: recipient.email,
+      user: recipient.name || "there",
       business_name: customer.businessName,
       agency_name: agencyName,
+      agency: agencyName,
       agency_owner: agencyOwner?.name || "",
       dashboard_url: appUrl(`/dashboard/${customer.id}`),
     });
     await sendEmail({
       ...content,
       to: recipient.email,
-      kind: "client_assigned",
+      kind: "agency_new_client",
     });
   }
 }

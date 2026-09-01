@@ -286,7 +286,9 @@ export default async function EmailsPage({
               placeholders — Resend does not merge these for you. Spaces and
               capitals are fine: {"{{Business Name}}"} and {"{{business_name}}"}{" "}
               both become the listing name. Marketing, info, and product-update
-              copy here is the starting point for broadcasts.
+              copy here is the starting point for broadcasts. Use “New client
+              for agency” when you want to email an agency that just received a
+              listing.
             </p>
           </div>
           <ul className="divide-y divide-border">
@@ -301,16 +303,30 @@ export default async function EmailsPage({
                     {item.subject}
                   </p>
                 </div>
-                <Link
-                  href={`/dashboard/emails?edit=${item.kind}`}
-                  className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "h-9 w-fit px-3",
-                    editingKind === item.kind && "border-primary text-primary",
-                  )}
-                >
-                  {editingKind === item.kind ? "Editing" : "Edit"}
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  {BROADCAST_KINDS.includes(item.kind as BroadcastKind) ? (
+                    <Link
+                      href={`/dashboard/emails?compose=${item.kind}`}
+                      className={cn(
+                        buttonVariants({ variant: "outline" }),
+                        "h-9 w-fit px-3",
+                        composeKind === item.kind && "border-primary text-primary",
+                      )}
+                    >
+                      Send
+                    </Link>
+                  ) : null}
+                  <Link
+                    href={`/dashboard/emails?edit=${item.kind}`}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "h-9 w-fit px-3",
+                      editingKind === item.kind && "border-primary text-primary",
+                    )}
+                  >
+                    {editingKind === item.kind ? "Editing" : "Edit"}
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>
@@ -473,9 +489,11 @@ export default async function EmailsPage({
                   defaultValue={composeKind}
                   className={cn(selectClassName, "mt-2")}
                 >
-                  <option value="marketing">Marketing</option>
-                  <option value="info">Info</option>
-                  <option value="update">Product update</option>
+                  {BROADCAST_KINDS.map((kind) => (
+                    <option key={kind} value={kind}>
+                      {kindLabel(kind)}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>

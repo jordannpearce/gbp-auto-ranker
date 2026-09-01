@@ -54,6 +54,7 @@ export const EMAIL_KINDS = [
   "new_business_signup",
   "campaign_assigned",
   "client_assigned",
+  "agency_new_client",
   "marketing",
   "info",
   "update",
@@ -61,7 +62,12 @@ export const EMAIL_KINDS = [
 
 export type EmailKind = (typeof EMAIL_KINDS)[number];
 
-export const BROADCAST_KINDS = ["marketing", "info", "update"] as const;
+export const BROADCAST_KINDS = [
+  "agency_new_client",
+  "marketing",
+  "info",
+  "update",
+] as const;
 export type BroadcastKind = (typeof BROADCAST_KINDS)[number];
 
 export const EMAIL_AUDIENCES = [

@@ -14,7 +14,7 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 - Session analytics on public website pages only (not the signed-in dashboard)
 - Email/password login, forgot-password reset, and signup for agencies or business owners
 - Transactional and broadcast email through [Resend](https://resend.com): confirmations, welcome, resets, intake receipts, assignment notices, team invites, staff alerts on new agency/business signups, plus admin marketing/info/update emails
-- Admin Emails page to save the Resend API key, from-address, and editable templates
+- Admin Emails page to save the Resend API key, from-address, and editable templates, including a sendable “New client for agency” email when a listing is assigned
 - Admin dashboard: add agencies, users, and customers; assign listings to agencies or business owners
 - Agency dashboard: add their own clients, manage team seats, choose exclusive or shared leads, and run campaigns
 - Business-owner dashboard: add and manage multiple locations on one login

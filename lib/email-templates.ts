@@ -259,7 +259,7 @@ export function broadcastEmail(input: {
   subject: string;
   heading: string;
   body: string;
-  kind: "marketing" | "info" | "update";
+  kind: "agency_new_client" | "marketing" | "info" | "update";
 }) {
   const footer =
     input.kind === "marketing"
