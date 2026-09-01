@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { MicrosoftClarity } from "@/components/microsoft-clarity";
 
 export function LegalPage({
   eyebrow,
@@ -14,6 +15,7 @@ export function LegalPage({
 }) {
   return (
     <div className="flex min-h-full flex-1 flex-col bg-white">
+      <MicrosoftClarity />
       <SiteHeader />
       <main className="flex-1">
         <article className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 lg:py-16">

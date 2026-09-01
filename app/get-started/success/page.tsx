@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { MicrosoftClarity } from "@/components/microsoft-clarity";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 export default async function SuccessPage() {
   return (
     <div className="flex min-h-full flex-1 flex-col bg-white">
+      <MicrosoftClarity />
       <SiteHeader />
       <main className="flex flex-1 items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg rounded-2xl border border-border bg-white p-8 text-center shadow-[0_16px_50px_-36px_rgba(8,43,117,0.45)]">

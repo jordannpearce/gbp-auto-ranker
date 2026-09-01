@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IntakeForm } from "@/components/intake-form";
+import { MicrosoftClarity } from "@/components/microsoft-clarity";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -18,6 +19,7 @@ export default async function GetStartedPage({
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-surface">
+      <MicrosoftClarity />
       <SiteHeader />
       <main className="flex-1">
         <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:py-14">

@@ -9,6 +9,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { MicrosoftClarity } from "@/components/microsoft-clarity";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -66,6 +67,7 @@ const fit = [
 export default function HomePage() {
   return (
     <div className="flex min-h-full flex-1 flex-col bg-white">
+      <MicrosoftClarity />
       <SiteHeader />
       <main className="flex-1">
         <section className="relative overflow-hidden">

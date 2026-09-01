@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { MicrosoftClarity } from "@/components/microsoft-clarity";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -34,6 +35,7 @@ const points = [
 export default function ForAgenciesPage() {
   return (
     <div className="flex min-h-full flex-1 flex-col bg-white">
+      <MicrosoftClarity />
       <SiteHeader />
       <main className="flex-1">
         <section className="border-b border-border bg-surface">
