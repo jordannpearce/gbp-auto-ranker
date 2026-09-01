@@ -56,11 +56,9 @@ export function parseCustomerInput(body: unknown): {
     referralSource: trim(raw.referralSource),
   };
 
-  if (!data.contactName) return { error: "Name is required." };
-  if (!data.email || !EMAIL_RE.test(data.email)) {
-    return { error: "A valid email is required." };
+  if (data.email && !EMAIL_RE.test(data.email)) {
+    return { error: "Email must be a valid address if you add one." };
   }
-  if (!data.phone) return { error: "Phone number is required." };
   if (!data.businessName) return { error: "Business name is required." };
   if (!data.category) return { error: "Business category is required." };
   if (!data.city) return { error: "City is required." };

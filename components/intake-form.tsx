@@ -98,33 +98,30 @@ export function IntakeForm({
       <FormSection
         eyebrow="Contact"
         title="Who should we work with?"
-        copy="We’ll use this to confirm the listing and send campaign updates."
+        copy="Optional. We’ll use this to confirm the listing and send campaign updates if you add it."
       >
-        <Field label="Full name" htmlFor="contactName" required>
+        <Field label="Full name" htmlFor="contactName">
           <Input
             id="contactName"
             name="contactName"
-            required
             autoComplete="off"
             placeholder="Jordan Hale"
           />
         </Field>
-        <Field label="Email" htmlFor="email" required>
+        <Field label="Email" htmlFor="email">
           <Input
             id="email"
             name="email"
             type="email"
-            required
             autoComplete="off"
             placeholder="you@business.com"
           />
         </Field>
-        <Field label="Phone" htmlFor="phone" required>
+        <Field label="Phone" htmlFor="phone">
           <Input
             id="phone"
             name="phone"
             type="tel"
-            required
             autoComplete="off"
             placeholder="(555) 123-4567"
           />
