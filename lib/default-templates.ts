@@ -52,23 +52,30 @@ export const EMAIL_TEMPLATE_META: Record<
   },
   campaign_assigned: {
     label: "Campaign assigned",
-    variables: ["name", "business_name", "agency_name"],
+    variables: ["name", "email", "business_name", "agency_name", "agency_owner"],
   },
   client_assigned: {
     label: "Client assigned",
-    variables: ["name", "business_name", "agency_name", "dashboard_url"],
+    variables: [
+      "name",
+      "email",
+      "business_name",
+      "agency_name",
+      "agency_owner",
+      "dashboard_url",
+    ],
   },
   marketing: {
     label: "Marketing",
-    variables: ["name"],
+    variables: ["name", "email", "agency_name", "agency_owner", "business_name"],
   },
   info: {
     label: "Info",
-    variables: ["name"],
+    variables: ["name", "email", "agency_name", "agency_owner", "business_name"],
   },
   update: {
     label: "Product update",
-    variables: ["name"],
+    variables: ["name", "email", "agency_name", "agency_owner", "business_name"],
   },
 };
 
@@ -161,7 +168,7 @@ export const DEFAULT_TEMPLATES: EmailTemplate[] = [
     heading: "Your campaign was assigned",
     body: "Hi {{name}},\n\nThe map-pack campaign for {{business_name}} is now with {{agency_name}}.\n\nThey have the keywords and Maps listing you submitted. Reply if those details change.",
     ctaLabel: "",
-    variables: ["name", "business_name", "agency_name"],
+    variables: ["name", "email", "business_name", "agency_name", "agency_owner"],
   },
   {
     kind: "client_assigned",
@@ -170,7 +177,14 @@ export const DEFAULT_TEMPLATES: EmailTemplate[] = [
     heading: "New lead assigned",
     body: "Hi {{name}},\n\nA new business was assigned to {{agency_name}}: {{business_name}}.\n\nOpen the listing, review the Maps URL and keywords, and follow up with the owner.",
     ctaLabel: "Open client",
-    variables: ["name", "business_name", "agency_name", "dashboard_url"],
+    variables: [
+      "name",
+      "email",
+      "business_name",
+      "agency_name",
+      "agency_owner",
+      "dashboard_url",
+    ],
   },
   {
     kind: "marketing",
@@ -179,7 +193,7 @@ export const DEFAULT_TEMPLATES: EmailTemplate[] = [
     heading: "A note from GBP Auto Ranker",
     body: "Hi {{name}},\n\nA short update for the businesses and agencies we work with. Reply if you want off this list.",
     ctaLabel: "",
-    variables: ["name"],
+    variables: ["name", "email", "agency_name", "agency_owner", "business_name"],
   },
   {
     kind: "info",
@@ -188,7 +202,7 @@ export const DEFAULT_TEMPLATES: EmailTemplate[] = [
     heading: "Account and campaign info",
     body: "Hi {{name}},\n\nHere is an informational update about your account or campaign.",
     ctaLabel: "",
-    variables: ["name"],
+    variables: ["name", "email", "agency_name", "agency_owner", "business_name"],
   },
   {
     kind: "update",
@@ -197,7 +211,7 @@ export const DEFAULT_TEMPLATES: EmailTemplate[] = [
     heading: "Product update",
     body: "Hi {{name}},\n\nA short note about a change to the product or how campaigns run.",
     ctaLabel: "",
-    variables: ["name"],
+    variables: ["name", "email", "agency_name", "agency_owner", "business_name"],
   },
 ];
 

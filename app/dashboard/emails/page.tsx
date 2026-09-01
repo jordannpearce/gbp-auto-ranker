@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { isAdmin } from "@/lib/access";
 import { loadDashboardUser } from "@/lib/dashboard";
 import { EMAIL_TEMPLATE_META } from "@/lib/default-templates";
+import { SHORTCODE_HELP } from "@/lib/email-vars";
 import { listEmailLogs } from "@/lib/email-log";
 import { formatDateTime } from "@/lib/format";
 import { fromAddress, isEmailConfigured } from "@/lib/mail";
@@ -38,6 +39,45 @@ function kindLabel(kind: string) {
   return EMAIL_TEMPLATE_META[kind as EmailKind]?.label || kind;
 }
 
+function ShortcodeHelp() {
+  return (
+    <section className="rounded-2xl border border-border bg-white p-6">
+      <h2 className="text-base font-semibold text-charcoal">Shortcodes</h2>
+      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+        Resend does not merge tags. We substitute these values before the
+        message is sent. Spaces and capitals work:{" "}
+        <code className="rounded bg-surface px-1 py-0.5 text-xs">
+          {"{{Business Name}}"}
+        </code>{" "}
+        is the same as{" "}
+        <code className="rounded bg-surface px-1 py-0.5 text-xs">
+          {"{{business_name}}"}
+        </code>
+        . Unknown shortcodes stay in the message so a typo is visible.
+      </p>
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        {SHORTCODE_HELP.map(([code, alias, hint]) => (
+          <li key={code} className="text-sm text-charcoal">
+            <code className="rounded bg-surface px-1 py-0.5 text-xs">
+              {code}
+            </code>
+            {alias ? (
+              <>
+                {" "}
+                <span className="text-muted-foreground">or</span>{" "}
+                <code className="rounded bg-surface px-1 py-0.5 text-xs">
+                  {alias}
+                </code>
+              </>
+            ) : null}
+            <span className="mt-0.5 block text-muted-foreground">{hint}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default async function EmailsPage({
   searchParams,
 }: {
@@ -51,6 +91,8 @@ export default async function EmailsPage({
     template?: string;
     edit?: string;
     compose?: string;
+    tested?: string;
+    testTo?: string;
   }>;
 }) {
   const { user, agency } = await loadDashboardUser();
@@ -66,6 +108,8 @@ export default async function EmailsPage({
     template,
     edit,
     compose,
+    tested,
+    testTo,
   } = params;
 
   const [logs, users, customers, mailSettings, templates, configured, from] =
@@ -102,8 +146,20 @@ export default async function EmailsPage({
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             Store your Resend API key and from-address here, then edit the
             templates used for welcome, activation, resets, and campaign mail.
-            Broadcasts stay on this page. Agency users cannot see this screen.
+            Send a test to any address before a real send. We fill shortcodes
+            ourselves — Resend does not merge tags. Agency users cannot see
+            this screen.
           </p>
+          {tested ? (
+            <p
+              className="mt-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950"
+              role="status"
+            >
+              Test email sent to {testTo || "your inbox"}. Shortcodes were
+              filled with the recipient’s values when we know them, or sample
+              values so you can check the merge.
+            </p>
+          ) : null}
           {error ? (
             <p
               className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
@@ -227,8 +283,10 @@ export default async function EmailsPage({
               <code className="rounded bg-surface px-1 py-0.5 text-xs">
                 {"{{variable}}"}
               </code>{" "}
-              placeholders. Marketing, info, and product-update copy here is
-              the starting point for broadcasts.
+              placeholders — Resend does not merge these for you. Spaces and
+              capitals are fine: {"{{Business Name}}"} and {"{{business_name}}"}{" "}
+              both become the listing name. Marketing, info, and product-update
+              copy here is the starting point for broadcasts.
             </p>
           </div>
           <ul className="divide-y divide-border">
@@ -258,6 +316,8 @@ export default async function EmailsPage({
           </ul>
         </section>
 
+        <ShortcodeHelp />
+
         {editing ? (
           <section className="rounded-2xl border border-border bg-white p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -268,6 +328,8 @@ export default async function EmailsPage({
                 <p className="mt-1 text-sm text-muted-foreground">
                   Variables:{" "}
                   {editing.variables.map((name) => `{{${name}}}`).join(" · ")}
+                  . {"{{user}}"} is the same as {"{{name}}"}. {"{{agency}}"} is
+                  the same as {"{{agency_name}}"}.
                 </p>
               </div>
               <Link
@@ -283,6 +345,7 @@ export default async function EmailsPage({
               className="mt-4 grid gap-4"
             >
               <input type="hidden" name="kind" value={editing.kind} />
+              <input type="hidden" name="templateKind" value={editing.kind} />
               <div>
                 <Label htmlFor="template-subject">Subject</Label>
                 <Input
@@ -333,15 +396,44 @@ export default async function EmailsPage({
                   Template saved. The next send of this type uses the new copy.
                 </p>
               ) : null}
-              <button
-                type="submit"
-                className={cn(
-                  buttonVariants(),
-                  "h-10 w-fit px-4 font-semibold brand-gradient text-white",
-                )}
-              >
-                Save template
-              </button>
+              <div>
+                <Label htmlFor="template-testTo">Send a test of this template</Label>
+                <Input
+                  id="template-testTo"
+                  name="testTo"
+                  type="email"
+                  className="mt-2"
+                  defaultValue={testTo || ""}
+                  placeholder="you@example.com"
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Uses the copy in these fields, even if you have not saved yet.
+                  Sample values fill the shortcodes.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="submit"
+                  className={cn(
+                    buttonVariants(),
+                    "h-10 w-fit px-4 font-semibold brand-gradient text-white",
+                  )}
+                >
+                  Save template
+                </button>
+                <button
+                  type="submit"
+                  formAction="/api/emails"
+                  name="intent"
+                  value="test"
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "h-10 w-fit px-4",
+                  )}
+                >
+                  Send test
+                </button>
+              </div>
             </form>
           </section>
         ) : null}
@@ -440,6 +532,34 @@ export default async function EmailsPage({
                 placeholder="Write the email in plain language. Separate paragraphs with a blank line."
               />
             </div>
+            <div className="rounded-lg border border-dashed border-border bg-surface px-3 py-3">
+              <p className="text-xs font-medium text-charcoal">
+                Shortcodes replaced per recipient
+              </p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                We substitute these before Resend sends. Unknown codes are left
+                as written so you can spot a typo.
+              </p>
+              <ul className="mt-2 grid gap-1 text-xs text-muted-foreground sm:grid-cols-2">
+                {SHORTCODE_HELP.map(([code, alias, hint]) => (
+                  <li key={code}>
+                    <code className="rounded bg-white px-1 py-0.5 text-[11px]">
+                      {code}
+                    </code>
+                    {alias ? (
+                      <>
+                        {" "}
+                        or{" "}
+                        <code className="rounded bg-white px-1 py-0.5 text-[11px]">
+                          {alias}
+                        </code>
+                      </>
+                    ) : null}{" "}
+                    — {hint}
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div>
               <Label htmlFor="customTo">Specific addresses</Label>
               <Textarea
@@ -458,15 +578,46 @@ export default async function EmailsPage({
                 {failed && failed !== "0" ? ` · ${failed} failed` : ""}.
               </p>
             ) : null}
-            <button
-              type="submit"
-              className={cn(
-                buttonVariants(),
-                "h-10 w-fit px-4 font-semibold brand-gradient text-white",
-              )}
-            >
-              Send email
-            </button>
+            <div>
+              <Label htmlFor="testTo">Send a test first</Label>
+              <Input
+                id="testTo"
+                name="testTo"
+                type="email"
+                className="mt-2"
+                defaultValue={testTo || ""}
+                placeholder="you@example.com"
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Goes to this address only. Nothing is sent to the audience.
+                Shortcodes use sample values unless this address is already a
+                user or customer.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                name="intent"
+                value="test"
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "h-10 w-fit px-4",
+                )}
+              >
+                Send test
+              </button>
+              <button
+                type="submit"
+                name="intent"
+                value="send"
+                className={cn(
+                  buttonVariants(),
+                  "h-10 w-fit px-4 font-semibold brand-gradient text-white",
+                )}
+              >
+                Send email
+              </button>
+            </div>
           </form>
         </section>
 

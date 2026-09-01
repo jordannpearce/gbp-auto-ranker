@@ -1,4 +1,5 @@
 import { renderBroadcastEmail, renderStoredEmail } from "@/lib/email-content";
+import { varsForEmail } from "@/lib/email-vars";
 import { appUrl, sendEmail } from "@/lib/mail";
 import {
   PRIMARY_ADMIN_EMAIL,
@@ -6,7 +7,14 @@ import {
   STAFF_ALERT_EMAIL,
 } from "@/lib/primary-admin";
 import type { Agency, BroadcastKind, Customer, User } from "@/lib/types";
-import { getAgency, getUser, listAgencyUsers, listUsers } from "@/lib/users";
+import { listCustomers } from "@/lib/store";
+import {
+  getAgency,
+  getUser,
+  listAgencies,
+  listAgencyUsers,
+  listUsers,
+} from "@/lib/users";
 
 async function staffAlertEmails() {
   const admins = (await listUsers()).filter((user) => user.role === "admin");
@@ -132,12 +140,17 @@ export async function notifyAssignment(
 
   const agency = await getAgency(customer.agencyId);
   const agencyName = agency?.name || "your SEO agency";
+  const agencyOwner = agency?.ownerUserId
+    ? await getUser(agency.ownerUserId)
+    : null;
 
   if (options?.notifyCustomer !== false && customer.email) {
     const content = await renderStoredEmail("campaign_assigned", {
       name: customer.contactName || "there",
+      email: customer.email,
       business_name: customer.businessName,
       agency_name: agencyName,
+      agency_owner: agencyOwner?.name || "",
     });
     await sendEmail({
       ...content,
@@ -164,8 +177,10 @@ export async function notifyAssignment(
   for (const recipient of recipients.values()) {
     const content = await renderStoredEmail("client_assigned", {
       name: recipient.name || "there",
+      email: recipient.email,
       business_name: customer.businessName,
       agency_name: agencyName,
+      agency_owner: agencyOwner?.name || "",
       dashboard_url: appUrl(`/dashboard/${customer.id}`),
     });
     await sendEmail({
@@ -239,14 +254,21 @@ export async function notifyBroadcast(input: {
       input.recipients.map((email) => email.trim().toLowerCase()).filter(Boolean),
     ),
   ];
-  const content = renderBroadcastEmail({
-    subject: input.subject,
-    heading: input.heading,
-    body: input.body,
-    kind: input.kind,
-  });
+  const [users, customers, agencies] = await Promise.all([
+    listUsers(),
+    listCustomers(),
+    listAgencies(),
+  ]);
+  const context = { users, customers, agencies };
   const results = [];
   for (const to of unique) {
+    const content = renderBroadcastEmail({
+      subject: input.subject,
+      heading: input.heading,
+      body: input.body,
+      kind: input.kind,
+      vars: varsForEmail(to, context),
+    });
     results.push(
       await sendEmail({
         ...content,
