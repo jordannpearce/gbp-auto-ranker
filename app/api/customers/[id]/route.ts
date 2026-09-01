@@ -3,7 +3,12 @@ import { canDeleteCustomer, canSeeCustomer, isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { parseCustomerUpdate } from "@/lib/customers";
 import { redirectTo } from "@/lib/http";
-import { assignmentChanged, notifyAssignment, wantsNotifyAgency } from "@/lib/notify";
+import {
+  assignmentChanged,
+  assignmentNotifyQuery,
+  notifyAssignment,
+  wantsNotifyAgency,
+} from "@/lib/notify";
 import { deleteCustomer, getCustomer, updateCustomer } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -81,10 +86,16 @@ export async function POST(
 
   const next = await updateCustomer(id, parsed.data);
   if (!next) return redirectTo("/dashboard");
+  const query = new URLSearchParams({ saved: "1" });
   if (assignmentChanged(customer, next) && next.agencyId) {
-    await notifyAssignment(next, { notifyAgency: wantsNotifyAgency(form) });
+    const notified = await notifyAssignment(next, {
+      notifyAgency: wantsNotifyAgency(form),
+    });
+    assignmentNotifyQuery(notified).forEach((value, key) => {
+      query.set(key, value);
+    });
   }
-  return redirectTo(`/dashboard/${id}?saved=1`);
+  return redirectTo(`/dashboard/${id}?${query}`);
 }
 
 export async function PATCH(
@@ -106,7 +117,9 @@ export async function PATCH(
   }
   const next = await updateCustomer(id, parsed.data);
   if (next && assignmentChanged(customer, next) && next.agencyId) {
-    await notifyAssignment(next, { notifyAgency: wantsNotifyAgency(body) });
+    await notifyAssignment(next, {
+      notifyAgency: wantsNotifyAgency(body),
+    });
   }
   return NextResponse.json({ customer: next });
 }

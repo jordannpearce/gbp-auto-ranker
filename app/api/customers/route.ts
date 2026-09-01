@@ -9,6 +9,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { parseCustomerInput } from "@/lib/customers";
 import { redirectTo } from "@/lib/http";
 import {
+  assignmentNotifyQuery,
   notifyAssignment,
   notifyCampaignReceived,
   wantsNotifyAgency,
@@ -123,18 +124,22 @@ export async function POST(request: Request) {
 
   const customer = await createCustomer(parsed.data, extras);
   await notifyCampaignReceived(customer);
+  const notifyParams = new URLSearchParams({ saved: "1" });
   if (user && isAdmin(user) && customer.agencyId) {
-    await notifyAssignment(customer, {
+    const notified = await notifyAssignment(customer, {
       notifyAgency: wantsNotifyAgency(
         raw && typeof raw === "object"
           ? (raw as Record<string, unknown>)
           : null,
       ),
     });
+    assignmentNotifyQuery(notified).forEach((value, key) => {
+      notifyParams.set(key, value);
+    });
   }
   if (viaForm) {
     if (returnTo.startsWith("/dashboard")) {
-      return redirectTo(`/dashboard/${customer.id}?saved=1`);
+      return redirectTo(`/dashboard/${customer.id}?${notifyParams}`);
     }
     return redirectTo(`/get-started/success?id=${customer.id}`);
   }

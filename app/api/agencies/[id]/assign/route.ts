@@ -1,7 +1,11 @@
 import { isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { redirectTo } from "@/lib/http";
-import { notifyAssignment, wantsNotifyAgency } from "@/lib/notify";
+import {
+  assignmentNotifyQuery,
+  notifyAssignment,
+  wantsNotifyAgency,
+} from "@/lib/notify";
 import { getCustomer, updateCustomer } from "@/lib/store";
 import { getAgency } from "@/lib/users";
 
@@ -31,8 +35,14 @@ export async function POST(
     agencyId: id,
     managerUserId,
   });
+  const query = new URLSearchParams({ saved: "1" });
   if (next) {
-    await notifyAssignment(next, { notifyAgency: wantsNotifyAgency(form) });
+    const notified = await notifyAssignment(next, {
+      notifyAgency: wantsNotifyAgency(form),
+    });
+    assignmentNotifyQuery(notified).forEach((value, key) => {
+      query.set(key, value);
+    });
   }
-  return redirectTo(`/dashboard/agencies/${id}?saved=1`);
+  return redirectTo(`/dashboard/agencies/${id}?${query}`);
 }

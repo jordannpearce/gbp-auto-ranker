@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { canDeleteCustomer, isAdmin, isBusinessOwner } from "@/lib/access";
 import { formatLocation, STATUS_LABELS } from "@/lib/customers";
 import { agencyAssignLabel } from "@/lib/leads";
+import { assignmentNotifyMessage } from "@/lib/notify";
 import { formatDateTime } from "@/lib/format";
 import type { Agency, PublicUser } from "@/lib/types";
 import { CAMPAIGN_STATUSES, type Customer } from "@/lib/types";
@@ -32,6 +33,8 @@ export function CustomerDetail({
   ownerName,
   error,
   saved,
+  notified,
+  agencyTo,
 }: {
   customer: Customer;
   user: PublicUser;
@@ -43,7 +46,10 @@ export function CustomerDetail({
   ownerName?: string;
   error?: string;
   saved?: boolean;
+  notified?: string;
+  agencyTo?: string;
 }) {
+  const mailNote = assignmentNotifyMessage(notified, agencyTo);
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -256,7 +262,7 @@ export function CustomerDetail({
               ) : null}
               {saved ? (
                 <p className="text-sm text-emerald-700" role="status">
-                  Campaign saved.
+                  Campaign saved.{mailNote ? ` ${mailNote}` : ""}
                 </p>
               ) : null}
               <button

@@ -26,11 +26,17 @@ export default async function CustomerPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    saved?: string;
+    notified?: string;
+    agencyTo?: string;
+    mailError?: string;
+  }>;
 }) {
   const { user, agency } = await loadDashboardUser();
   const { id } = await params;
-  const { error, saved } = await searchParams;
+  const { error, saved, notified, agencyTo, mailError } = await searchParams;
   const customer = await getCustomer(id);
   if (!customer || !canSeeCustomer(user, customer)) notFound();
 
@@ -59,8 +65,10 @@ export default async function CustomerPage({
           agencyName={assignedAgency?.name}
           managerName={manager?.name}
           ownerName={owner?.name}
-          error={error}
+          error={error || mailError}
           saved={saved === "1"}
+          notified={notified}
+          agencyTo={agencyTo}
         />
       </main>
     </div>

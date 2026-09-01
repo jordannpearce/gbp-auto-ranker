@@ -13,6 +13,7 @@ import {
   leadPreferenceCopy,
   leadPreferenceLabel,
 } from "@/lib/leads";
+import { assignmentNotifyMessage } from "@/lib/notify";
 import { listCustomers } from "@/lib/store";
 import { getAgency, listAgencyUsers } from "@/lib/users";
 import { cn } from "@/lib/utils";
@@ -38,12 +39,17 @@ export default async function AgencyDetailPage({
     saved?: string;
     created?: string;
     preference?: string;
+    notified?: string;
+    agencyTo?: string;
+    mailError?: string;
   }>;
 }) {
   const { user, agency: currentAgency } = await loadDashboardUser();
   if (!isAdmin(user)) redirect("/dashboard");
   const { id } = await params;
-  const { error, saved, created, preference } = await searchParams;
+  const { error, saved, created, preference, notified, agencyTo, mailError } =
+    await searchParams;
+  const mailNote = assignmentNotifyMessage(notified, agencyTo, mailError);
   const agency = await getAgency(id);
   if (!agency) notFound();
 
@@ -186,7 +192,11 @@ export default async function AgencyDetailPage({
             {saved ? (
               <p className="sm:col-span-2 text-sm text-emerald-700">
                 Customer assigned to this agency.
+                {mailNote ? ` ${mailNote}` : ""}
               </p>
+            ) : null}
+            {mailError ? (
+              <p className="sm:col-span-2 text-sm text-red-600">{mailError}</p>
             ) : null}
             <div className="sm:col-span-2">
               <NotifyAgencyField />

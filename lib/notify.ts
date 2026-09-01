@@ -121,22 +121,48 @@ export async function notifyCampaignReceived(
   return Promise.all(jobs);
 }
 
+function notifyAgencyValues(
+  source: FormData | Record<string, unknown> | null | undefined,
+) {
+  if (!source) return [];
+  if (source instanceof FormData) {
+    return source.getAll("notifyAgency").map((item) => String(item).toLowerCase());
+  }
+  const raw = source.notifyAgency;
+  if (Array.isArray(raw)) return raw.map((item) => String(item).toLowerCase());
+  if (raw === undefined || raw === null) return [];
+  return [String(raw).toLowerCase()];
+}
+
 export function wantsNotifyAgency(
   source: FormData | Record<string, unknown> | null | undefined,
 ) {
-  if (!source) return false;
-  const raw =
-    source instanceof FormData ? source.get("notifyAgency") : source.notifyAgency;
-  if (raw === true) return true;
-  const value = String(raw ?? "").toLowerCase();
-  return value === "yes" || value === "on" || value === "true" || value === "1";
+  const values = notifyAgencyValues(source);
+  if (values.length === 0) return true;
+  return values.some(
+    (value) => value === "yes" || value === "on" || value === "true" || value === "1",
+  );
 }
+
+export type AssignmentNotifyResult = {
+  customerEmailed: boolean;
+  agencyEmailed: number;
+  agencyRecipients: string[];
+  skippedAgency: boolean;
+  error?: string;
+};
 
 export async function notifyAssignment(
   customer: Customer,
   options?: { notifyAgency?: boolean; notifyCustomer?: boolean },
-) {
-  if (!customer.agencyId) return;
+): Promise<AssignmentNotifyResult> {
+  const empty: AssignmentNotifyResult = {
+    customerEmailed: false,
+    agencyEmailed: 0,
+    agencyRecipients: [],
+    skippedAgency: options?.notifyAgency === false,
+  };
+  if (!customer.agencyId) return empty;
 
   const agency = await getAgency(customer.agencyId);
   const agencyName = agency?.name || "your SEO agency";
@@ -144,6 +170,7 @@ export async function notifyAssignment(
     ? await getUser(agency.ownerUserId)
     : null;
 
+  let customerEmailed = false;
   if (options?.notifyCustomer !== false && customer.email) {
     const content = await renderStoredEmail("campaign_assigned", {
       name: customer.contactName || "there",
@@ -152,14 +179,17 @@ export async function notifyAssignment(
       agency_name: agencyName,
       agency_owner: agencyOwner?.name || "",
     });
-    await sendEmail({
+    const sent = await sendEmail({
       ...content,
       to: customer.email,
       kind: "campaign_assigned",
     });
+    customerEmailed = sent.status !== "failed";
   }
 
-  if (!options?.notifyAgency) return;
+  if (options?.notifyAgency === false) {
+    return { ...empty, customerEmailed, skippedAgency: true };
+  }
 
   const recipients = new Map<string, User>();
   for (const member of await listAgencyUsers(customer.agencyId)) {
@@ -174,6 +204,18 @@ export async function notifyAssignment(
     if (manager?.email) recipients.set(manager.email.toLowerCase(), manager);
   }
 
+  if (recipients.size === 0) {
+    return {
+      customerEmailed,
+      agencyEmailed: 0,
+      agencyRecipients: [],
+      skippedAgency: false,
+      error: "That agency has no email addresses to notify.",
+    };
+  }
+
+  const agencyRecipients: string[] = [];
+  const errors: string[] = [];
   for (const recipient of recipients.values()) {
     const content = await renderStoredEmail("agency_new_client", {
       name: recipient.name || "there",
@@ -185,12 +227,25 @@ export async function notifyAssignment(
       agency_owner: agencyOwner?.name || "",
       dashboard_url: appUrl(`/dashboard/${customer.id}`),
     });
-    await sendEmail({
+    const sent = await sendEmail({
       ...content,
       to: recipient.email,
       kind: "agency_new_client",
     });
+    if (sent.status === "failed") {
+      errors.push(sent.error || recipient.email);
+    } else {
+      agencyRecipients.push(recipient.email);
+    }
   }
+
+  return {
+    customerEmailed,
+    agencyEmailed: agencyRecipients.length,
+    agencyRecipients,
+    skippedAgency: false,
+    error: errors.length ? errors.join(" · ") : undefined,
+  };
 }
 
 export async function notifyStaffAgencySignup(input: {
@@ -232,6 +287,33 @@ export async function notifyStaffBusinessSignup(user: User) {
     });
   });
   return Promise.all(jobs);
+}
+
+export function assignmentNotifyQuery(result: AssignmentNotifyResult) {
+  const params = new URLSearchParams();
+  if (result.skippedAgency) params.set("notified", "skipped");
+  else params.set("notified", String(result.agencyEmailed));
+  if (result.agencyRecipients.length) {
+    params.set("agencyTo", result.agencyRecipients.join(", "));
+  }
+  if (result.error) params.set("mailError", result.error);
+  return params;
+}
+
+export function assignmentNotifyMessage(
+  notified?: string,
+  agencyTo?: string,
+  mailError?: string,
+) {
+  if (mailError) return mailError;
+  if (notified === "skipped") return "Agency email was skipped.";
+  if (notified && notified !== "0") {
+    return agencyTo
+      ? `Emailed the agency (${agencyTo}) that this listing was assigned.`
+      : "Emailed the agency that this listing was assigned.";
+  }
+  if (notified === "0") return "Could not email the agency.";
+  return "";
 }
 
 export function assignmentChanged(
