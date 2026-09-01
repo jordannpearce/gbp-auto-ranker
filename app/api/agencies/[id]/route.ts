@@ -18,12 +18,14 @@ export async function POST(
 ) {
   const user = await getCurrentUser();
   const { id } = await params;
-  if (!user || !isAdmin(user)) {
-    return redirectTo("/dashboard");
+  if (!user) {
+    return redirectTo("/login");
   }
 
   const agency = await getAgency(id);
-  if (!agency) return redirectTo("/dashboard/agencies");
+  if (!agency) {
+    return redirectTo(isAdmin(user) ? "/dashboard/agencies" : "/dashboard");
+  }
 
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "");
@@ -45,8 +47,8 @@ export async function POST(
     return redirectTo(`${returnTo}?preference=1`);
   }
 
-  if (intent !== "delete") {
-    return redirectTo(adminReturn);
+  if (!isAdmin(user) || intent !== "delete") {
+    return redirectTo(isAdmin(user) ? adminReturn : "/dashboard");
   }
   if (!confirmedDuplicate(form)) {
     return redirectTo(
