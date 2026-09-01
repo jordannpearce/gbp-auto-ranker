@@ -12,7 +12,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { isAdmin, isBusinessOwner } from "@/lib/access";
+import { canDeleteCustomer, isAdmin, isBusinessOwner } from "@/lib/access";
 import { formatLocation, STATUS_LABELS } from "@/lib/customers";
 import { formatDateTime } from "@/lib/format";
 import type { Agency, PublicUser } from "@/lib/types";
@@ -306,9 +306,30 @@ export function CustomerDetail({
             </dl>
           </Panel>
 
-          {isAdmin(user) ? (
-            <form action={`/api/customers/${customer.id}`} method="post">
+          {canDeleteCustomer(user, customer) ? (
+            <form
+              action={`/api/customers/${customer.id}`}
+              method="post"
+              className="space-y-3 rounded-2xl border border-red-200 bg-red-50/60 p-4"
+            >
               <input type="hidden" name="intent" value="delete" />
+              <p className="text-sm font-semibold text-charcoal">
+                Remove a duplicate listing
+              </p>
+              <p className="text-sm leading-6 text-muted-foreground">
+                Deletes this customer file. Use this when the same business was
+                added twice. This cannot be undone.
+              </p>
+              <label className="flex items-start gap-3 text-sm leading-6 text-charcoal">
+                <input
+                  type="checkbox"
+                  name="confirmDelete"
+                  value="yes"
+                  required
+                  className="mt-1 size-4 accent-red-700"
+                />
+                <span>Yes, this is a duplicate and I want it deleted.</span>
+              </label>
               <button
                 type="submit"
                 className={cn(
@@ -317,7 +338,7 @@ export function CustomerDetail({
                 )}
               >
                 <Trash2 className="size-4" />
-                Remove customer
+                Delete listing
               </button>
             </form>
           ) : null}

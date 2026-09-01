@@ -29,8 +29,8 @@ export default async function GetStartedPage({
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
             Name, business details, your Google Maps link, and the searches you
-            want to win. A campaign is $150. Agency owners running ten or more
-            listings can ask for volume pricing. Everything you enter here
+            want to win. An agency partner will follow up about the campaign —
+            this form does not quote a public price. Everything you enter here
             shows up on the customer dashboard so the work starts on the right
             profile.
           </p>

@@ -12,7 +12,7 @@ export default function PrivacyPage() {
     <LegalPage
       eyebrow="Legal"
       title="Privacy policy"
-      updated="August 29, 2026"
+      updated="September 1, 2026"
     >
       <p>
         GBP Auto Ranker (“we”, “us”) runs map-pack campaigns for Google
@@ -54,6 +54,11 @@ export default function PrivacyPage() {
           Send occasional product or campaign updates if you have an account
           or an active campaign. You can reply and ask to stop those.
         </li>
+        <li>
+          Understand how people use the public website (pages such as the
+          homepage, intake form, and these legal pages). We do not load that
+          measurement on the signed-in dashboard.
+        </li>
         <li>Keep the service secure and fix problems.</li>
       </ul>
 
@@ -61,9 +66,10 @@ export default function PrivacyPage() {
       <p>
         We share campaign details with the agency or teammate assigned to that
         listing. We use outside companies only to host the product, send
-        email, and keep the service online. Those companies may process your
-        information solely to provide that work for us. We do not sell your
-        contact list or campaign keywords.
+        email, keep the service online, and measure visits to the public
+        website. Those companies may process your information solely to
+        provide that work for us. We do not sell your contact list or
+        campaign keywords.
       </p>
 
       <h2>How long we keep it</h2>

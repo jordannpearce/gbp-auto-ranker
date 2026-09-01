@@ -375,6 +375,32 @@ export async function createAgency(input: {
   });
 }
 
+export async function deleteAgency(id: string) {
+  return withLock(async () => {
+    await ensureAccounts();
+    const agencies = await readJson<Agency[]>(AGENCIES_FILE, []);
+    const nextAgencies = agencies.filter((agency) => agency.id !== id);
+    if (nextAgencies.length === agencies.length) return false;
+    const users = await readUsers();
+    const removedIds = new Set<string>();
+    const nextUsers = users.flatMap((user) => {
+      if (user.agencyId !== id || user.role === "admin") return [user];
+      if (user.role === "business_owner") {
+        return [{ ...user, agencyId: "" }];
+      }
+      removedIds.add(user.id);
+      return [];
+    });
+    const resets = (await readJson<PasswordReset[]>(RESETS_FILE, [])).filter(
+      (item) => !removedIds.has(item.userId),
+    );
+    await writeJson(USERS_FILE, nextUsers);
+    await writeJson(AGENCIES_FILE, nextAgencies);
+    await writeJson(RESETS_FILE, resets);
+    return true;
+  });
+}
+
 export async function createResetToken(userId: string) {
   return withLock(async () => {
     await ensureAccounts();

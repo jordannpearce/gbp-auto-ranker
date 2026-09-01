@@ -364,6 +364,24 @@ export async function createAgency(input: {
   return { user, agency };
 }
 
+export async function deleteAgency(id: string) {
+  await ensureAccounts();
+  const agency = await getAgency(id);
+  if (!agency) return false;
+  await withTransaction(async (client) => {
+    await client.query(
+      `UPDATE users SET agency_id = '' WHERE agency_id = $1 AND role = 'business_owner'`,
+      [id],
+    );
+    await client.query(
+      `DELETE FROM users WHERE agency_id = $1 AND role IN ('agency_owner', 'agency_member')`,
+      [id],
+    );
+    await client.query("DELETE FROM agencies WHERE id = $1", [id]);
+  });
+  return true;
+}
+
 export async function createResetToken(userId: string) {
   await query(
     "DELETE FROM password_resets WHERE user_id = $1 OR expires_at <= NOW()",

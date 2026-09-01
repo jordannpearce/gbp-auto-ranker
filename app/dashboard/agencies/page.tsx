@@ -34,8 +34,8 @@ export default async function AgenciesPage() {
               Agencies
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Add an agency yourself, or open one to assign customers and see
-              their users.
+              Add an agency yourself, or open one to assign customers, see
+              their users, or remove a duplicate.
             </p>
           </div>
           <Link

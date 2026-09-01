@@ -28,6 +28,14 @@ export function canSeeCustomer(
   return Boolean(user.agencyId) && customer.agencyId === user.agencyId;
 }
 
+export function canDeleteCustomer(
+  user: Pick<User, "role" | "agencyId" | "id">,
+  customer: Pick<Customer, "agencyId" | "ownerUserId">,
+) {
+  if (!canSeeCustomer(user, customer)) return false;
+  return isAdmin(user) || isAgencyUser(user);
+}
+
 export function visibleCustomers(
   user: Pick<User, "role" | "agencyId" | "id">,
   customers: Customer[],

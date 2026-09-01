@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { canSeeCustomer, isAdmin } from "@/lib/access";
+import { canDeleteCustomer, canSeeCustomer, isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { parseCustomerUpdate } from "@/lib/customers";
 import { redirectTo } from "@/lib/http";
@@ -7,6 +7,10 @@ import { assignmentChanged, notifyAssignment } from "@/lib/notify";
 import { deleteCustomer, getCustomer, updateCustomer } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
+
+function confirmedDuplicate(form: FormData) {
+  return String(form.get("confirmDelete") ?? "") === "yes";
+}
 
 async function loadOwned(id: string) {
   const user = await getCurrentUser();
@@ -43,9 +47,14 @@ export async function POST(
   const intent = String(form.get("intent") ?? "save");
 
   if (intent === "delete") {
-    if (!isAdmin(user)) {
+    if (!canDeleteCustomer(user, customer)) {
       return redirectTo(
-        `/dashboard/${id}?error=${encodeURIComponent("Only an admin can remove a customer.")}`,
+        `/dashboard/${id}?error=${encodeURIComponent("You cannot remove this listing.")}`,
+      );
+    }
+    if (!confirmedDuplicate(form)) {
+      return redirectTo(
+        `/dashboard/${id}?error=${encodeURIComponent("Tick the box to confirm you are removing a duplicate.")}`,
       );
     }
     await deleteCustomer(id);
@@ -108,9 +117,9 @@ export async function DELETE(
   if (!user || !customer) {
     return NextResponse.json({ error: "Customer not found." }, { status: 404 });
   }
-  if (!isAdmin(user)) {
+  if (!canDeleteCustomer(user, customer)) {
     return NextResponse.json(
-      { error: "Only an admin can remove a customer." },
+      { error: "You cannot remove this listing." },
       { status: 403 },
     );
   }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
@@ -66,6 +67,11 @@ export default async function AgencyDetailPage({
               temporary password you set.
             </p>
           ) : null}
+          {error ? (
+            <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </p>
+          ) : null}
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href={`/dashboard/clients/new?agencyId=${agency.id}`}
@@ -129,9 +135,6 @@ export default async function AgencyDetailPage({
                 ))}
               </select>
             </div>
-            {error ? (
-              <p className="sm:col-span-2 text-sm text-red-600">{error}</p>
-            ) : null}
             {saved ? (
               <p className="sm:col-span-2 text-sm text-emerald-700">
                 Customer assigned to this agency.
@@ -195,6 +198,44 @@ export default async function AgencyDetailPage({
               ) : null}
             </ul>
           </div>
+        </section>
+
+        <section className="rounded-2xl border border-red-200 bg-red-50/60 p-6">
+          <h2 className="text-base font-semibold text-charcoal">
+            Remove a duplicate agency
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Deletes this agency and its team logins. Client listings stay in
+            the dashboard and become unassigned so you can attach them to the
+            real agency. Business-owner logins are kept.
+          </p>
+          <form
+            action={`/api/agencies/${agency.id}`}
+            method="post"
+            className="mt-4 space-y-3"
+          >
+            <input type="hidden" name="intent" value="delete" />
+            <label className="flex items-start gap-3 text-sm leading-6 text-charcoal">
+              <input
+                type="checkbox"
+                name="confirmDelete"
+                value="yes"
+                required
+                className="mt-1 size-4 accent-red-700"
+              />
+              <span>Yes, this is a duplicate agency and I want it deleted.</span>
+            </label>
+            <button
+              type="submit"
+              className={cn(
+                buttonVariants({ variant: "destructive" }),
+                "h-10 px-4",
+              )}
+            >
+              <Trash2 className="size-4" />
+              Delete agency
+            </button>
+          </form>
         </section>
       </main>
     </div>

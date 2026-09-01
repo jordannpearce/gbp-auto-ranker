@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "For agencies",
   description:
-    "White-label GBP Auto Ranker for the local businesses you already manage. One agency book, teammate seats, and volume pricing from 10 campaigns.",
+    "White-label GBP Auto Ranker for the local businesses you already manage. One agency book, teammate seats, and you talk to each owner about the campaign.",
 };
 
 const points = [
@@ -26,8 +26,8 @@ const points = [
     copy: "Add agency users with a temporary password. They sign in, open the same campaigns, and leave notes.",
   },
   {
-    title: "Volume pricing from 10 campaigns",
-    copy: "A single campaign is $150. At ten listings we quote an agency rate. The discount is not a public menu — we set it with you.",
+    title: "You quote the client",
+    copy: "Business owners are sent to a GBP Auto Ranker agency partner — not a public price on this site. You set the terms with each listing you manage.",
   },
 ];
 
@@ -67,7 +67,7 @@ export default function ForAgenciesPage() {
                   "h-11 px-5 font-semibold",
                 )}
               >
-                See agency pricing
+                How partners work
               </Link>
             </div>
           </div>
@@ -122,7 +122,8 @@ export default function ForAgenciesPage() {
                   "Add teammates who share the same client book",
                   "Open every assigned listing, keyword list, and Maps URL",
                   "Create a client from inside the dashboard",
-                  "Ask for volume pricing once you reach ten campaigns",
+                  "Remove a duplicate client listing from the dashboard",
+                  "Talk to each business owner about the campaign — this site does not publish a public price",
                 ].map((item) => (
                   <li key={item} className="flex gap-3 text-sm leading-6">
                     <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
@@ -146,8 +147,7 @@ export default function ForAgenciesPage() {
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
               Create the agency account, confirm your email, then add the first
-              clients. When you are approaching ten campaigns, write us and we
-              will set the volume rate.
+              clients. You stay the point of contact for each business owner.
             </p>
             <Link
               href="/signup"

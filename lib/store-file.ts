@@ -152,3 +152,22 @@ export async function deleteCustomer(id: string) {
     return true;
   });
 }
+
+export async function unassignAgencyCustomers(agencyId: string) {
+  return withLock(async () => {
+    const customers = await readCustomers();
+    let changed = false;
+    const next = customers.map((customer) => {
+      if (customer.agencyId !== agencyId) return customer;
+      changed = true;
+      return {
+        ...customer,
+        agencyId: "",
+        managerUserId: "",
+        updatedAt: new Date().toISOString(),
+      };
+    });
+    if (changed) await writeCustomers(next);
+    return changed;
+  });
+}

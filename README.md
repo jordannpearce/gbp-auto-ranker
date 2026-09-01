@@ -9,6 +9,10 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 - Marketing site with the brand logo and blue/black/white palette
 - Campaign intake: name, business details, Google Maps link, keywords, comments
 - Email/password login, forgot-password reset, and signup for agencies or business owners
+- Public pages point business owners to a GBP Auto Ranker agency partner — no public dollar amount
+- Admin and agency users can delete duplicate client listings; admins can delete duplicate agencies (listings stay and become unassigned)
+- Session analytics on public website pages only (not the signed-in dashboard)
+- Email/password login, forgot-password reset, and signup for agencies or business owners
 - Transactional and broadcast email through [Resend](https://resend.com): confirmations, welcome, resets, intake receipts, assignment notices, team invites, plus admin marketing/info/update emails
 - Admin Emails page to save the Resend API key, from-address, and editable templates
 - Admin dashboard: add agencies, users, and customers; assign listings to agencies or business owners
@@ -20,9 +24,9 @@ GBP Auto Ranker runs real searches, clicks, and engagement signals against a Goo
 
 | Role | What they see |
 | --- | --- |
-| Admin | Every customer. Manually adds agencies, users, and customers, then assigns listings to an agency or a business owner. |
-| Agency owner | Agency clients, team roster, ability to add users and new clients. |
-| Agency user | The same client book, plus the ability to add clients for that agency. |
+| Admin | Every customer. Manually adds agencies, users, and customers, then assigns listings to an agency or a business owner. Can delete duplicate listings or agencies. |
+| Agency owner | Agency clients, team roster, ability to add users and new clients, and ability to delete a duplicate client listing. |
+| Agency user | The same client book, plus the ability to add clients for that agency and delete a duplicate listing. |
 | Business owner | Their locations only. Can add more listings on the same account. |
 
 The live admin account is created for the operator and is not shown on the public login page. Sample clients and the old demo agency are not seeded.

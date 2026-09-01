@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function EmailPolicyPage() {
   return (
-    <LegalPage eyebrow="Legal" title="Email policy" updated="August 29, 2026">
+    <LegalPage eyebrow="Legal" title="Email policy" updated="September 1, 2026">
       <p>
         We send email so you can confirm an account, recover a password, and
         stay current on a campaign. This page lists what we send and how to
@@ -38,7 +38,7 @@ export default function EmailPolicyPage() {
       <h2>Updates and marketing</h2>
       <p>
         From time to time we may send information about the product, campaign
-        tips, or changes to pricing. Those messages go to people who have an
+        tips, or changes to the service. Those messages go to people who have an
         account or an active campaign. They are not sold to other companies.
         Reply to the message and ask to be removed if you do not want them.
         We will stop the optional mail and keep sending only the account or

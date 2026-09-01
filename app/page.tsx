@@ -216,7 +216,7 @@ export default function HomePage() {
                 ],
                 [
                   "SEO agencies",
-                  "Teams that want one dashboard for every client listing, teammate seats, and a volume rate once they pass ten campaigns.",
+                  "Teams that want one dashboard for every client listing and teammate seats, then talk to each business owner about the campaign.",
                 ],
               ].map(([title, copy]) => (
                 <article
@@ -256,17 +256,16 @@ export default function HomePage() {
               </p>
             </div>
             <div className="rounded-2xl border border-border bg-white p-6">
-              <p className="text-sm font-semibold text-primary">Pricing</p>
-              <p className="mt-3 text-4xl font-semibold tracking-tight text-charcoal">
-                $150
-                <span className="ml-2 text-base font-medium text-muted-foreground">
-                  per campaign
-                </span>
+              <p className="text-sm font-semibold text-primary">
+                Agency partners
+              </p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight text-charcoal">
+                Talk with a partner
               </p>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Agency owners who run ten or more campaigns can get a
-                discounted rate. We set that number with you when you reach
-                that volume.
+                Campaign terms come from a GBP Auto Ranker agency partner — not
+                a public price on this site. Submit the listing, then speak
+                with the partner who will run the work.
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -276,7 +275,7 @@ export default function HomePage() {
                     "h-11 px-5 font-semibold brand-gradient text-white",
                   )}
                 >
-                  See pricing
+                  Find an agency partner
                 </Link>
                 <Link
                   href="/for-agencies"
@@ -383,8 +382,8 @@ export default function HomePage() {
                   "Use Forgot password on the login page. We email a one-hour link to the address on the account.",
                 ],
                 [
-                  "What does $150 include?",
-                  "One campaign on one listing, on the keywords you submit. Ten or more campaigns through an agency can qualify for a volume rate we confirm when you book.",
+                  "Who sets the campaign terms?",
+                  "A GBP Auto Ranker agency partner. This website does not publish a public price. Submit the listing here, then talk with the partner assigned to the work.",
                 ],
               ].map(([q, a]) => (
                 <div key={q} className="rounded-2xl border border-border bg-white p-5">

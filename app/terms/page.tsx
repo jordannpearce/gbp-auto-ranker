@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalPage eyebrow="Legal" title="Terms of use" updated="August 29, 2026">
+    <LegalPage eyebrow="Legal" title="Terms of use" updated="September 1, 2026">
       <p>
         These terms cover the GBP Auto Ranker website, campaign intake, agency
         accounts, and the ranking work we perform on a Google Business
@@ -57,10 +57,9 @@ export default function TermsPage() {
 
       <h2>Fees</h2>
       <p>
-        A standard campaign is $150. Agency owners who run ten or more
-        campaigns can request volume pricing. The discounted rate is set when
-        you book that volume — it is not listed as a public schedule. Unpaid
-        campaigns may be paused.
+        Campaign terms are set with a GBP Auto Ranker agency partner. This
+        website does not publish a public price. Unpaid campaigns may be
+        paused.
       </p>
 
       <h2>Content you send us</h2>

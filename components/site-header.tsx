@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { MicrosoftClarity } from "@/components/microsoft-clarity";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/#how-it-works", label: "How it works" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/pricing", label: "Agency partners" },
   { href: "/for-agencies", label: "For agencies" },
   { href: "/get-started", label: "Start a campaign" },
   { href: "/login", label: "Log in" },
@@ -15,6 +16,7 @@ const links = [
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur-md">
+      <MicrosoftClarity />
       <div className="mx-auto flex h-[5.25rem] w-full max-w-6xl items-center justify-between px-4 sm:px-6">
         <BrandLogo />
         <nav className="hidden items-center gap-7 text-sm font-medium text-charcoal md:flex">

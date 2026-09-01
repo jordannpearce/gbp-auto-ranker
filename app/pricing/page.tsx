@@ -7,9 +7,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Pricing",
+  title: "Agency partners",
   description:
-    "GBP Auto Ranker campaigns start at $150. Agency owners can request volume pricing from 10 campaigns.",
+    "GBP Auto Ranker campaigns are set up with an agency partner. Business owners talk to that partner — there is no public price on this site.",
 };
 
 const included = [
@@ -28,29 +28,29 @@ export default function PricingPage() {
         <section className="border-b border-border bg-surface">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:py-16">
             <p className="text-xs font-semibold tracking-[0.2em] text-primary uppercase">
-              Pricing
+              Agency partners
             </p>
             <h1 className="mt-3 max-w-2xl text-4xl font-semibold tracking-tight text-charcoal">
-              $150 per campaign. Volume rates for agencies that run a book of
-              listings.
+              Talk with a GBP Auto Ranker agency partner about your campaign.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-              One price for a single business. Agency owners who bring ten or
-              more campaigns can lock in a discounted rate. We set that rate
-              with you when you reach that volume — it is not published as a
-              public grid.
+              This site does not publish a public price. If you own the
+              business, an agency partner quotes the work, stays your point of
+              contact, and runs the listing in the dashboard. If you run an
+              agency, create an account and take those clients on.
             </p>
           </div>
         </section>
 
         <section className="mx-auto grid max-w-6xl gap-6 px-4 py-14 sm:px-6 lg:grid-cols-2">
           <article className="rounded-2xl border border-border bg-white p-6 sm:p-8">
-            <p className="text-sm font-semibold text-primary">Single campaign</p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-charcoal">
-              $150
+            <p className="text-sm font-semibold text-primary">Business owners</p>
+            <p className="mt-3 text-3xl font-semibold tracking-tight text-charcoal">
+              Work with a partner
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Per Google Business Profile campaign.
+              Submit the listing, then speak with the agency assigned to the
+              campaign.
             </p>
             <ul className="mt-6 space-y-3">
               {included.map((item) => (
@@ -72,30 +72,30 @@ export default function PricingPage() {
           </article>
 
           <article className="rounded-2xl border border-border bg-white p-6 sm:p-8">
-            <p className="text-sm font-semibold text-primary">Agency volume</p>
-            <p className="mt-3 text-4xl font-semibold tracking-tight text-charcoal">
-              From 10 campaigns
+            <p className="text-sm font-semibold text-primary">Agencies</p>
+            <p className="mt-3 text-3xl font-semibold tracking-tight text-charcoal">
+              You quote the client
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Discounted pricing for agency owners. The exact rate is confirmed
-              when you book that volume.
+              White-label the map-pack work. You keep the relationship and set
+              the terms with each business owner.
             </p>
             <ul className="mt-6 space-y-3 text-sm leading-6 text-muted-foreground">
               <li>
-                Built for SEO agencies that white-label map-pack work for a
-                roster of local businesses.
+                Built for SEO agencies that run map-pack work for a roster of
+                local businesses.
               </li>
               <li>
                 One agency account, multiple teammates, and every client in
                 the same dashboard.
               </li>
               <li>
-                Volume starts at ten active or booked campaigns. Below that,
-                the $150 campaign price applies.
+                Business owners are pointed to you — not to a public price on
+                this website.
               </li>
               <li>
-                Tell us how many listings you plan to run. We will quote the
-                agency rate before you add the tenth campaign.
+                Create the agency account, then add clients yourself or take
+                public intakes once they are assigned.
               </li>
             </ul>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -124,7 +124,7 @@ export default function PricingPage() {
         <section className="border-t border-border bg-surface">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
             <h2 className="text-2xl font-semibold tracking-tight text-charcoal">
-              What the $150 covers
+              What a campaign covers
             </h2>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {[
@@ -154,8 +154,9 @@ export default function PricingPage() {
             </div>
             <p className="mt-8 max-w-2xl text-sm leading-6 text-muted-foreground">
               Rank is not guaranteed. Google decides what the map pack shows.
-              The campaign fee is for the work we run against the listing, not
-              a promised position.
+              The campaign is the work we run against the listing, not a
+              promised position. Terms for that work come from your agency
+              partner.
             </p>
           </div>
         </section>

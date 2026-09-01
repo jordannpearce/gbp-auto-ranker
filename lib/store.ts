@@ -31,3 +31,7 @@ export async function updateCustomer(id: string, update: CustomerUpdate) {
 export async function deleteCustomer(id: string) {
   return repo().deleteCustomer(id);
 }
+
+export async function unassignAgencyCustomers(agencyId: string) {
+  return repo().unassignAgencyCustomers(agencyId);
+}

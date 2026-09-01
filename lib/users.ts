@@ -60,6 +60,10 @@ export async function createAgency(
   return repo().createAgency(input);
 }
 
+export async function deleteAgency(id: string) {
+  return repo().deleteAgency(id);
+}
+
 export async function createResetToken(userId: string) {
   return repo().createResetToken(userId);
 }

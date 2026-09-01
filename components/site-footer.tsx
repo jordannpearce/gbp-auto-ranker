@@ -20,7 +20,7 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
           <Link href="/pricing" className="hover:text-primary">
-            Pricing
+            Agency partners
           </Link>
           <Link href="/for-agencies" className="hover:text-primary">
             For agencies

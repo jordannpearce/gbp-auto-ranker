@@ -146,3 +146,13 @@ export async function deleteCustomer(id: string) {
   const result = await query("DELETE FROM customers WHERE id = $1", [id]);
   return (result.rowCount ?? 0) > 0;
 }
+
+export async function unassignAgencyCustomers(agencyId: string) {
+  const result = await query(
+    `UPDATE customers
+     SET agency_id = '', manager_user_id = '', updated_at = $2
+     WHERE agency_id = $1`,
+    [agencyId, new Date().toISOString()],
+  );
+  return (result.rowCount ?? 0) > 0;
+}
