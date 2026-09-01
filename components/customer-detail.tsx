@@ -8,6 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { selectClassName } from "@/components/field";
+import { NotifyAgencyField } from "@/components/notify-agency-field";
 import { StatusBadge } from "@/components/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -220,6 +221,7 @@ export function CustomerDetail({
                       ))}
                     </select>
                   </div>
+                  <NotifyAgencyField form="campaign-form" />
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">

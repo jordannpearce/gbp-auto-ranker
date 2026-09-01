@@ -8,7 +8,11 @@ import {
 import { getCurrentUser } from "@/lib/auth";
 import { parseCustomerInput } from "@/lib/customers";
 import { redirectTo } from "@/lib/http";
-import { notifyAssignment, notifyCampaignReceived } from "@/lib/notify";
+import {
+  notifyAssignment,
+  notifyCampaignReceived,
+  wantsNotifyAgency,
+} from "@/lib/notify";
 import { createCustomer, customerStats, listCustomers } from "@/lib/store";
 import type { CustomerExtras } from "@/lib/types";
 import { getUser } from "@/lib/users";
@@ -120,7 +124,13 @@ export async function POST(request: Request) {
   const customer = await createCustomer(parsed.data, extras);
   await notifyCampaignReceived(customer);
   if (user && isAdmin(user) && customer.agencyId) {
-    await notifyAssignment(customer);
+    await notifyAssignment(customer, {
+      notifyAgency: wantsNotifyAgency(
+        raw && typeof raw === "object"
+          ? (raw as Record<string, unknown>)
+          : null,
+      ),
+    });
   }
   if (viaForm) {
     if (returnTo.startsWith("/dashboard")) {

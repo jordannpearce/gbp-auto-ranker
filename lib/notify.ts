@@ -113,13 +113,27 @@ export async function notifyCampaignReceived(
   return Promise.all(jobs);
 }
 
-export async function notifyAssignment(customer: Customer) {
+export function wantsNotifyAgency(
+  source: FormData | Record<string, unknown> | null | undefined,
+) {
+  if (!source) return false;
+  const raw =
+    source instanceof FormData ? source.get("notifyAgency") : source.notifyAgency;
+  if (raw === true) return true;
+  const value = String(raw ?? "").toLowerCase();
+  return value === "yes" || value === "on" || value === "true" || value === "1";
+}
+
+export async function notifyAssignment(
+  customer: Customer,
+  options?: { notifyAgency?: boolean; notifyCustomer?: boolean },
+) {
   if (!customer.agencyId) return;
 
   const agency = await getAgency(customer.agencyId);
   const agencyName = agency?.name || "your SEO agency";
 
-  if (customer.email) {
+  if (options?.notifyCustomer !== false && customer.email) {
     const content = await renderStoredEmail("campaign_assigned", {
       name: customer.contactName || "there",
       business_name: customer.businessName,
@@ -131,6 +145,8 @@ export async function notifyAssignment(customer: Customer) {
       kind: "campaign_assigned",
     });
   }
+
+  if (!options?.notifyAgency) return;
 
   const recipients = new Map<string, User>();
   for (const member of await listAgencyUsers(customer.agencyId)) {

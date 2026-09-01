@@ -1,7 +1,7 @@
 import { isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { redirectTo } from "@/lib/http";
-import { notifyAssignment } from "@/lib/notify";
+import { notifyAssignment, wantsNotifyAgency } from "@/lib/notify";
 import { getCustomer, updateCustomer } from "@/lib/store";
 import { getAgency } from "@/lib/users";
 
@@ -32,7 +32,7 @@ export async function POST(
     managerUserId,
   });
   if (next) {
-    await notifyAssignment(next);
+    await notifyAssignment(next, { notifyAgency: wantsNotifyAgency(form) });
   }
   return redirectTo(`/dashboard/agencies/${id}?saved=1`);
 }

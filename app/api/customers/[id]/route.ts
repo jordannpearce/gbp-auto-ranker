@@ -3,7 +3,7 @@ import { canDeleteCustomer, canSeeCustomer, isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { parseCustomerUpdate } from "@/lib/customers";
 import { redirectTo } from "@/lib/http";
-import { assignmentChanged, notifyAssignment } from "@/lib/notify";
+import { assignmentChanged, notifyAssignment, wantsNotifyAgency } from "@/lib/notify";
 import { deleteCustomer, getCustomer, updateCustomer } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -82,7 +82,7 @@ export async function POST(
   const next = await updateCustomer(id, parsed.data);
   if (!next) return redirectTo("/dashboard");
   if (assignmentChanged(customer, next) && next.agencyId) {
-    await notifyAssignment(next);
+    await notifyAssignment(next, { notifyAgency: wantsNotifyAgency(form) });
   }
   return redirectTo(`/dashboard/${id}?saved=1`);
 }
@@ -96,14 +96,17 @@ export async function PATCH(
   if (!customer) {
     return NextResponse.json({ error: "Customer not found." }, { status: 404 });
   }
-  const body = await request.json().catch(() => null);
+  const body = (await request.json().catch(() => null)) as Record<
+    string,
+    unknown
+  > | null;
   const parsed = parseCustomerUpdate(body);
   if (parsed.error || !parsed.data) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
   const next = await updateCustomer(id, parsed.data);
   if (next && assignmentChanged(customer, next) && next.agencyId) {
-    await notifyAssignment(next);
+    await notifyAssignment(next, { notifyAgency: wantsNotifyAgency(body) });
   }
   return NextResponse.json({ customer: next });
 }

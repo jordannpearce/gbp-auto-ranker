@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { NotifyAgencyField } from "@/components/notify-agency-field";
 import { selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
 import { isAdmin, roleLabel } from "@/lib/access";
@@ -140,6 +141,9 @@ export default async function AgencyDetailPage({
                 Customer assigned to this agency.
               </p>
             ) : null}
+            <div className="sm:col-span-2">
+              <NotifyAgencyField />
+            </div>
             <button
               type="submit"
               className={cn(

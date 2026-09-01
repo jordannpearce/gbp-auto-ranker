@@ -1,4 +1,5 @@
 import { Field, FormSection, selectClassName } from "@/components/field";
+import { NotifyAgencyField } from "@/components/notify-agency-field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,6 +92,7 @@ export function IntakeForm({
                 ))}
             </select>
           </Field>
+          <NotifyAgencyField className="sm:col-span-2" />
         </FormSection>
       ) : null}
       <FormSection
