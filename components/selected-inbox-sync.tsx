@@ -1,40 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { parseEmailList } from "@/lib/contact";
-
-const STORAGE_KEY = "gbp-selected-email-to";
-const CHANGE_EVENT = "gbp-selected-email-to";
-
-function readStored() {
-  try {
-    return parseEmailList(JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "[]"));
-  } catch {
-    return [];
-  }
-}
+import {
+  SELECTED_INBOXES_EVENT,
+  SELECTED_INBOXES_KEY,
+  mergeSelectedInboxes,
+  writeSelectedInboxes,
+} from "@/lib/selected-inboxes";
 
 function subscribe(onStoreChange: () => void) {
-  window.addEventListener(CHANGE_EVENT, onStoreChange);
+  window.addEventListener(SELECTED_INBOXES_EVENT, onStoreChange);
   window.addEventListener("storage", onStoreChange);
   return () => {
-    window.removeEventListener(CHANGE_EVENT, onStoreChange);
+    window.removeEventListener(SELECTED_INBOXES_EVENT, onStoreChange);
     window.removeEventListener("storage", onStoreChange);
   };
 }
 
 function getSnapshot() {
-  return sessionStorage.getItem(STORAGE_KEY) || "[]";
+  return sessionStorage.getItem(SELECTED_INBOXES_KEY) || "[]";
 }
 
 function getServerSnapshot() {
   return "[]";
-}
-
-function writeStored(addresses: string[]) {
-  if (addresses.length === 0) sessionStorage.removeItem(STORAGE_KEY);
-  else sessionStorage.setItem(STORAGE_KEY, JSON.stringify(addresses));
-  window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
 function fillCompose(addresses: string[]) {
@@ -59,24 +48,21 @@ export function SelectedInboxSync({
     getServerSnapshot,
   );
   const incomingKey = incoming.join(",");
-  const stored = useMemo(() => {
-    try {
-      return parseEmailList(JSON.parse(storedRaw));
-    } catch {
-      return [];
-    }
-  }, [storedRaw]);
+  let stored: string[] = [];
+  try {
+    stored = parseEmailList(JSON.parse(storedRaw));
+  } catch {
+    stored = parseEmailList(storedRaw);
+  }
   const addresses = sent ? [] : parseEmailList([...stored, ...incoming]);
 
   useEffect(() => {
     if (sent) {
-      writeStored([]);
+      writeSelectedInboxes([]);
       fillCompose([]);
       return;
     }
-    const merged = parseEmailList([...readStored(), ...incoming]);
-    writeStored(merged);
-    fillCompose(merged);
+    fillCompose(mergeSelectedInboxes(incoming));
   }, [incomingKey, incoming, sent]);
 
   if (addresses.length === 0) return null;
@@ -97,7 +83,7 @@ export function SelectedInboxSync({
         type="button"
         className="mt-2 text-sm font-medium text-primary hover:underline"
         onClick={() => {
-          writeStored([]);
+          writeSelectedInboxes([]);
           fillCompose([]);
         }}
       >

@@ -1,5 +1,8 @@
+"use client";
+
 import { buttonVariants } from "@/components/ui/button";
 import { SelectAllCheckbox } from "@/components/select-all-checkbox";
+import { mergeSelectedInboxes } from "@/lib/selected-inboxes";
 import { cn } from "@/lib/utils";
 
 export function EmailSelectForm({
@@ -10,7 +13,29 @@ export function EmailSelectForm({
   compose?: string;
 }) {
   return (
-    <form action="/dashboard/emails" method="get" className="space-y-0">
+    <form
+      action="/dashboard/emails"
+      method="get"
+      className="space-y-0"
+      onSubmit={(event) => {
+        const form = event.currentTarget;
+        const checked = [
+          ...form.querySelectorAll<HTMLInputElement>(
+            'input[name="to"]:checked:not(:disabled)',
+          ),
+        ].map((input) => input.value);
+        const merged = mergeSelectedInboxes(checked);
+        const already = new Set(checked.map((email) => email.toLowerCase()));
+        for (const email of merged) {
+          if (already.has(email)) continue;
+          const hidden = document.createElement("input");
+          hidden.type = "hidden";
+          hidden.name = "to";
+          hidden.value = email;
+          form.appendChild(hidden);
+        }
+      }}
+    >
       <input type="hidden" name="compose" value={compose} />
       {children}
     </form>
