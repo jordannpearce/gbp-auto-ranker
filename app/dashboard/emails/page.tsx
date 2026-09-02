@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { SelectedInboxSync } from "@/components/selected-inbox-sync";
+import { SelectedInboxBanner } from "@/components/selected-inbox-banner";
 import { selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { isAdmin } from "@/lib/access";
-import { parseEmailList } from "@/lib/contact";
 import { loadDashboardUser } from "@/lib/dashboard";
+import {
+  SELECTED_INBOXES_COOKIE,
+  mergeInboxSources,
+} from "@/lib/selected-inboxes";
 import { EMAIL_TEMPLATE_META } from "@/lib/default-templates";
 import { SHORTCODE_HELP } from "@/lib/email-vars";
 import { listEmailLogs } from "@/lib/email-log";
@@ -143,7 +147,12 @@ export default async function EmailsPage({
     : "info";
   const composeTemplate = templates.find((item) => item.kind === composeKind);
   const maskedKey = maskApiKey(mailSettings.apiKey);
-  const selectedAddresses = parseEmailList(params.to);
+  const selectedAddresses = sent
+    ? []
+    : mergeInboxSources(
+        (await cookies()).get(SELECTED_INBOXES_COOKIE)?.value,
+        params.to,
+      );
   const selectedQuery = selectedAddresses
     .map((email) => `to=${encodeURIComponent(email)}`)
     .join("&");
@@ -484,7 +493,7 @@ export default async function EmailsPage({
             above. Check boxes on Customers, Users, or Agencies to fill
             specific addresses.
           </p>
-          <SelectedInboxSync incoming={selectedAddresses} sent={sent} />
+          <SelectedInboxBanner addresses={selectedAddresses} sent={sent} />
           <div className="mt-3 flex flex-wrap gap-2">
             {BROADCAST_KINDS.map((kind) => (
               <Link

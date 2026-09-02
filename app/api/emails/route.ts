@@ -3,6 +3,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { renderBroadcastEmail, renderStoredEmail } from "@/lib/email-content";
 import { testEmailVars } from "@/lib/email-vars";
 import { redirectTo } from "@/lib/http";
+import {
+  SELECTED_INBOXES_COOKIE,
+  selectedInboxesCookieOptions,
+} from "@/lib/selected-inboxes";
 import { sendEmail } from "@/lib/mail";
 import { notifyBroadcast } from "@/lib/notify";
 import { listCustomers } from "@/lib/store";
@@ -165,7 +169,13 @@ export async function POST(request: Request) {
     recipients: unique,
   });
 
-  return redirectTo(
+  const response = redirectTo(
     `/dashboard/emails?sent=${result.attempted}&delivered=${result.delivered}&logged=${result.logged}&failed=${result.failed}`,
   );
+  response.cookies.set(
+    SELECTED_INBOXES_COOKIE,
+    "",
+    selectedInboxesCookieOptions(0),
+  );
+  return response;
 }

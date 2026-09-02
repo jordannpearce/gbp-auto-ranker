@@ -1,28 +1,23 @@
-"use client";
-
 import { parseEmailList } from "@/lib/contact";
 
-export const SELECTED_INBOXES_KEY = "gbp-selected-email-to";
-export const SELECTED_INBOXES_EVENT = "gbp-selected-email-to";
+export const SELECTED_INBOXES_COOKIE = "gbp_selected_email_to";
 
-export function readSelectedInboxes() {
-  try {
-    return parseEmailList(
-      JSON.parse(sessionStorage.getItem(SELECTED_INBOXES_KEY) || "[]"),
-    );
-  } catch {
-    return [];
-  }
+export function selectedInboxesCookieOptions(maxAge = 60 * 60) {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge,
+  };
 }
 
-export function writeSelectedInboxes(addresses: string[]) {
-  const unique = parseEmailList(addresses);
-  if (unique.length === 0) sessionStorage.removeItem(SELECTED_INBOXES_KEY);
-  else sessionStorage.setItem(SELECTED_INBOXES_KEY, JSON.stringify(unique));
-  window.dispatchEvent(new Event(SELECTED_INBOXES_EVENT));
-  return unique;
-}
-
-export function mergeSelectedInboxes(incoming: string[]) {
-  return writeSelectedInboxes([...readSelectedInboxes(), ...incoming]);
+export function mergeInboxSources(
+  ...values: Array<string | string[] | undefined>
+) {
+  return parseEmailList(
+    values.flatMap((value) =>
+      Array.isArray(value) ? value : value ? [value] : [],
+    ),
+  );
 }
