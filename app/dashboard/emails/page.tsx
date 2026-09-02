@@ -10,11 +10,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { isAdmin } from "@/lib/access";
+import { parseEmailList } from "@/lib/contact";
 import { loadDashboardUser } from "@/lib/dashboard";
 import {
   SELECTED_INBOXES_COOKIE,
   mergeInboxSources,
 } from "@/lib/selected-inboxes";
+import {
+  addSelectedInboxes,
+  clearSelectedInboxes,
+  getSelectedInboxes,
+} from "@/lib/selected-inbox-store";
 import { EMAIL_TEMPLATE_META } from "@/lib/default-templates";
 import { SHORTCODE_HELP } from "@/lib/email-vars";
 import { listEmailLogs } from "@/lib/email-log";
@@ -147,12 +153,16 @@ export default async function EmailsPage({
     : "info";
   const composeTemplate = templates.find((item) => item.kind === composeKind);
   const maskedKey = maskApiKey(mailSettings.apiKey);
+  if (sent) await clearSelectedInboxes(user.id);
+  const incoming = parseEmailList(params.to);
   const selectedAddresses = sent
     ? []
-    : mergeInboxSources(
-        (await cookies()).get(SELECTED_INBOXES_COOKIE)?.value,
-        params.to,
-      );
+    : incoming.length > 0
+      ? await addSelectedInboxes(user.id, incoming)
+      : mergeInboxSources(
+          await getSelectedInboxes(user.id),
+          (await cookies()).get(SELECTED_INBOXES_COOKIE)?.value,
+        );
   const selectedQuery = selectedAddresses
     .map((email) => `to=${encodeURIComponent(email)}`)
     .join("&");

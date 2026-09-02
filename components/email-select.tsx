@@ -10,7 +10,12 @@ export function EmailSelectForm({
   compose?: string;
 }) {
   return (
-    <form action="/api/emails/select" method="post" className="space-y-0">
+    <form
+      action="/api/emails/select"
+      method="post"
+      className="space-y-0"
+      data-email-select="1"
+    >
       <input type="hidden" name="compose" value={compose} />
       {children}
     </form>

@@ -7,6 +7,7 @@ import {
   SELECTED_INBOXES_COOKIE,
   selectedInboxesCookieOptions,
 } from "@/lib/selected-inboxes";
+import { clearSelectedInboxes } from "@/lib/selected-inbox-store";
 import { sendEmail } from "@/lib/mail";
 import { notifyBroadcast } from "@/lib/notify";
 import { listCustomers } from "@/lib/store";
@@ -169,6 +170,7 @@ export async function POST(request: Request) {
     recipients: unique,
   });
 
+  await clearSelectedInboxes(user.id);
   const response = redirectTo(
     `/dashboard/emails?sent=${result.attempted}&delivered=${result.delivered}&logged=${result.logged}&failed=${result.failed}`,
   );

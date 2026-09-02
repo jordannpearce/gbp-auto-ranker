@@ -1,13 +1,15 @@
-import { cookies } from "next/headers";
 import { isAdmin } from "@/lib/access";
 import { getCurrentUser } from "@/lib/auth";
 import { parseEmailList } from "@/lib/contact";
 import { redirectTo } from "@/lib/http";
 import {
   SELECTED_INBOXES_COOKIE,
-  mergeInboxSources,
   selectedInboxesCookieOptions,
 } from "@/lib/selected-inboxes";
+import {
+  addSelectedInboxes,
+  clearSelectedInboxes,
+} from "@/lib/selected-inbox-store";
 
 function composePath(compose: string, addresses: string[]) {
   const params = new URLSearchParams();
@@ -26,11 +28,9 @@ export async function POST(request: Request) {
   const intent = String(form.get("intent") ?? "add");
   const compose = String(form.get("compose") ?? "info");
   const incoming = parseEmailList(form.getAll("to").map(String));
-  const existing = parseEmailList(
-    (await cookies()).get(SELECTED_INBOXES_COOKIE)?.value,
-  );
 
   if (intent === "clear") {
+    await clearSelectedInboxes(user.id);
     const response = redirectTo("/dashboard/emails?compose=info");
     response.cookies.set(
       SELECTED_INBOXES_COOKIE,
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     return response;
   }
 
-  const merged = mergeInboxSources(existing, incoming);
+  const merged = await addSelectedInboxes(user.id, incoming);
   if (merged.length === 0) {
     return redirectTo(
       `/dashboard/emails?error=${encodeURIComponent("Check at least one customer, user, or agency with an email.")}`,
