@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ContactEmail } from "@/components/contact-email";
 import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalPage eyebrow="Legal" title="Terms of use" updated="September 1, 2026">
+    <LegalPage eyebrow="Legal" title="Terms of use" updated="September 2, 2026">
       <p>
         These terms cover the GBP Auto Ranker website, campaign intake, agency
         accounts, and the ranking work we perform on a Google Business
@@ -88,9 +89,7 @@ export default function TermsPage() {
       <h2>Contact</h2>
       <p>
         Questions about these terms:{" "}
-        <a className="font-medium text-primary hover:underline" href="mailto:hello@info.gbpranker.com">
-          hello@info.gbpranker.com
-        </a>
+        <ContactEmail className="font-medium text-primary hover:underline" />
         .
       </p>
     </LegalPage>

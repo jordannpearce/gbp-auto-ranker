@@ -53,7 +53,7 @@ export default async function DashboardPage({
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             {isAdmin(user)
-              ? "Each row is a listing. The Agency column shows who is running it. A business-owner login only shows here after a listing is attached to them."
+              ? "Each row is a listing. The Agency column shows who is running it. A business-owner login only shows here after a listing is attached to them. Check boxes to email specific listing inboxes."
               : isBusinessOwner(user)
                 ? "Each location is a Google Business Profile you want in the map pack. Add another when you open a second shop."
                 : `These are the businesses assigned to your agency. You asked for ${agency?.leadPreference === "shared" ? "shared" : "exclusive"} leads — change that under Agency. Add a client or open one to see the keywords and Maps listing.`}

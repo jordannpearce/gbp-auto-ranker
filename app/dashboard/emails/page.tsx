@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
+import { SelectedInboxSync } from "@/components/selected-inbox-sync";
 import { selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { isAdmin } from "@/lib/access";
+import { parseEmailList } from "@/lib/contact";
 import { loadDashboardUser } from "@/lib/dashboard";
 import { EMAIL_TEMPLATE_META } from "@/lib/default-templates";
 import { SHORTCODE_HELP } from "@/lib/email-vars";
@@ -91,6 +93,7 @@ export default async function EmailsPage({
     template?: string;
     edit?: string;
     compose?: string;
+    to?: string | string[];
     tested?: string;
     testTo?: string;
     testedSubject?: string;
@@ -140,6 +143,10 @@ export default async function EmailsPage({
     : "info";
   const composeTemplate = templates.find((item) => item.kind === composeKind);
   const maskedKey = maskApiKey(mailSettings.apiKey);
+  const selectedAddresses = parseEmailList(params.to);
+  const selectedQuery = selectedAddresses
+    .map((email) => `to=${encodeURIComponent(email)}`)
+    .join("&");
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-surface">
@@ -474,13 +481,15 @@ export default async function EmailsPage({
           <p className="mt-1 text-sm text-muted-foreground">
             Starts from the saved {kindLabel(composeKind).toLowerCase()}{" "}
             template. Change the type below, or open a template from the list
-            above.
+            above. Check boxes on Customers, Users, or Agencies to fill
+            specific addresses.
           </p>
+          <SelectedInboxSync incoming={selectedAddresses} sent={sent} />
           <div className="mt-3 flex flex-wrap gap-2">
             {BROADCAST_KINDS.map((kind) => (
               <Link
                 key={kind}
-                href={`/dashboard/emails?compose=${kind}`}
+                href={`/dashboard/emails?compose=${kind}${selectedQuery ? `&${selectedQuery}` : ""}`}
                 className={cn(
                   buttonVariants({ variant: "outline" }),
                   "h-8 px-3 text-xs",
@@ -515,7 +524,9 @@ export default async function EmailsPage({
                   id="audience"
                   name="audience"
                   required
-                  defaultValue="agency_owners"
+                  defaultValue={
+                    selectedAddresses.length > 0 ? "custom" : "agency_owners"
+                  }
                   className={cn(selectClassName, "mt-2")}
                 >
                   <option value="all_users">All users</option>
@@ -598,6 +609,7 @@ export default async function EmailsPage({
                 name="customTo"
                 rows={3}
                 className="mt-2"
+                defaultValue={selectedAddresses.join("\n")}
                 placeholder="Only used when audience is specific addresses. Separate with commas or new lines."
               />
             </div>

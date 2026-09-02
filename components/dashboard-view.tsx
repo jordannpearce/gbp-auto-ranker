@@ -7,10 +7,16 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import {
+  EmailSelectBox,
+  EmailSelectForm,
+  EmailSelectedBar,
+} from "@/components/email-select";
 import { selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { agencyName, ownerName } from "@/lib/attachments";
+import { listingContactEmail } from "@/lib/contact";
 import { formatLocation, STATUS_LABELS } from "@/lib/customers";
 import { formatDate } from "@/lib/format";
 import { customerStats } from "@/lib/stats";
@@ -170,102 +176,149 @@ export function DashboardView({
           ) : null}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-white">
-          <div
-            className={cn(
-              "hidden gap-4 border-b border-border bg-surface px-5 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase lg:grid",
-              isBusinessOwner
-                ? "grid-cols-[1.4fr_1fr_auto_auto]"
-                : isAdmin
-                  ? "grid-cols-[1.3fr_1fr_1fr_1fr_auto_auto]"
-                  : "grid-cols-[1.3fr_1fr_1fr_auto_auto]",
-            )}
-          >
-            <span>Business</span>
-            <span>Contact</span>
-            {isBusinessOwner ? null : <span>Agency</span>}
-            {isAdmin ? <span>Owner</span> : null}
-            <span>Status</span>
-            <span>Added</span>
-          </div>
-          <ul className="divide-y divide-border">
-            {filtered.map((customer) => {
-              const assignedAgency =
-                agencyName(agencies, customer.agencyId) || "Unassigned";
-              const assignedOwner = ownerName(users, customer.ownerUserId);
-              const manager = customer.managerUserId
-                ? users.find((item) => item.id === customer.managerUserId)?.name
-                : "";
-              return (
-              <li key={customer.id}>
-                <Link
-                  href={`/dashboard/${customer.id}`}
-                  className={cn(
-                    "grid gap-3 px-5 py-4 transition-colors hover:bg-accent/60 lg:items-center",
-                    isBusinessOwner
-                      ? "lg:grid-cols-[1.4fr_1fr_auto_auto]"
-                      : isAdmin
-                        ? "lg:grid-cols-[1.3fr_1fr_1fr_1fr_auto_auto]"
-                        : "lg:grid-cols-[1.3fr_1fr_1fr_auto_auto]",
-                  )}
-                >
-                  <div>
-                    <p className="font-semibold text-charcoal">
-                      {customer.businessName}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {customer.category}
-                      {customer.city ? ` · ${formatLocation(customer)}` : ""}
-                    </p>
-                    {customer.keywords.length > 0 ? (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {customer.keywords.slice(0, 3).join(" · ")}
-                        {customer.keywords.length > 3
-                          ? ` +${customer.keywords.length - 3}`
-                          : ""}
-                      </p>
-                    ) : null}
-                    {isBusinessOwner ? null : (
-                      <p className="mt-1 text-sm font-medium text-charcoal lg:hidden">
-                        {assignedAgency}
-                        {manager ? ` · ${manager}` : ""}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{customer.contactName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {customer.email}
-                    </p>
-                  </div>
-                  {isBusinessOwner ? null : (
-                    <div>
-                      <p className="text-sm font-medium text-charcoal">
-                        {assignedAgency}
-                      </p>
-                      {manager ? (
-                        <p className="text-sm text-muted-foreground">{manager}</p>
-                      ) : null}
-                    </div>
-                  )}
-                  {isAdmin ? (
-                    <p className="text-sm text-charcoal">
-                      {assignedOwner || "—"}
-                    </p>
-                  ) : null}
-                  <StatusBadge status={customer.status} />
-                  <p className="text-sm text-muted-foreground">
-                    {formatDate(customer.createdAt)}
-                  </p>
-                </Link>
-              </li>
-              );
-            })}
-          </ul>
-        </div>
+        <CustomerList
+          customers={filtered}
+          isAdmin={isAdmin}
+          isBusinessOwner={Boolean(isBusinessOwner)}
+          agencies={agencies}
+          users={users}
+        />
       )}
     </div>
   );
+}
+
+function CustomerList({
+  customers,
+  isAdmin,
+  isBusinessOwner,
+  agencies,
+  users,
+}: {
+  customers: Customer[];
+  isAdmin: boolean;
+  isBusinessOwner: boolean;
+  agencies: Agency[];
+  users: PublicUser[];
+}) {
+  const list = (
+    <div className="overflow-hidden rounded-2xl border border-border bg-white">
+      <div className="flex border-b border-border bg-surface">
+        {isAdmin ? (
+          <div className="hidden w-12 shrink-0 lg:block" aria-hidden />
+        ) : null}
+        <div
+          className={cn(
+            "hidden flex-1 gap-4 px-5 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase lg:grid",
+            isBusinessOwner
+              ? "grid-cols-[1.4fr_1fr_auto_auto]"
+              : isAdmin
+                ? "grid-cols-[1.3fr_1fr_1fr_1fr_auto_auto]"
+                : "grid-cols-[1.3fr_1fr_1fr_auto_auto]",
+          )}
+        >
+          <span>Business</span>
+          <span>Contact</span>
+          {isBusinessOwner ? null : <span>Agency</span>}
+          {isAdmin ? <span>Owner</span> : null}
+          <span>Status</span>
+          <span>Added</span>
+        </div>
+      </div>
+      <ul className="divide-y divide-border">
+        {customers.map((customer) => {
+          const assignedAgency =
+            agencyName(agencies, customer.agencyId) || "Unassigned";
+          const assignedOwner = ownerName(users, customer.ownerUserId);
+          const manager = customer.managerUserId
+            ? users.find((item) => item.id === customer.managerUserId)?.name
+            : "";
+          const inbox = listingContactEmail(customer, users);
+          return (
+            <li key={customer.id} className="flex items-stretch">
+              {isAdmin ? (
+                <div className="flex shrink-0 items-center px-4">
+                  <EmailSelectBox
+                    value={inbox}
+                    title={
+                      inbox
+                        ? `Email ${inbox}`
+                        : "No email on this listing or attached owner"
+                    }
+                  />
+                </div>
+              ) : null}
+              <Link
+                href={`/dashboard/${customer.id}`}
+                className={cn(
+                  "min-w-0 flex-1 grid gap-3 px-5 py-4 transition-colors hover:bg-accent/60 lg:items-center",
+                  isBusinessOwner
+                    ? "lg:grid-cols-[1.4fr_1fr_auto_auto]"
+                    : isAdmin
+                      ? "lg:grid-cols-[1.3fr_1fr_1fr_1fr_auto_auto]"
+                      : "lg:grid-cols-[1.3fr_1fr_1fr_auto_auto]",
+                )}
+              >
+                <div>
+                  <p className="font-semibold text-charcoal">
+                    {customer.businessName}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {customer.category}
+                    {customer.city ? ` · ${formatLocation(customer)}` : ""}
+                  </p>
+                  {customer.keywords.length > 0 ? (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {customer.keywords.slice(0, 3).join(" · ")}
+                      {customer.keywords.length > 3
+                        ? ` +${customer.keywords.length - 3}`
+                        : ""}
+                    </p>
+                  ) : null}
+                  {isBusinessOwner ? null : (
+                    <p className="mt-1 text-sm font-medium text-charcoal lg:hidden">
+                      {assignedAgency}
+                      {manager ? ` · ${manager}` : ""}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{customer.contactName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {inbox || "No email"}
+                  </p>
+                </div>
+                {isBusinessOwner ? null : (
+                  <div>
+                    <p className="text-sm font-medium text-charcoal">
+                      {assignedAgency}
+                    </p>
+                    {manager ? (
+                      <p className="text-sm text-muted-foreground">{manager}</p>
+                    ) : null}
+                  </div>
+                )}
+                {isAdmin ? (
+                  <p className="text-sm text-charcoal">
+                    {assignedOwner || "—"}
+                  </p>
+                ) : null}
+                <StatusBadge status={customer.status} />
+                <p className="text-sm text-muted-foreground">
+                  {formatDate(customer.createdAt)}
+                </p>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+      {isAdmin ? (
+        <EmailSelectedBar emptyHint="Check customers to email their listing or attached owner inbox." />
+      ) : null}
+    </div>
+  );
+
+  return isAdmin ? <EmailSelectForm>{list}</EmailSelectForm> : list;
 }
 
 function StatCard({

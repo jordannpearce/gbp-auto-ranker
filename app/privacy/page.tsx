@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ContactEmail } from "@/components/contact-email";
 import { LegalPage } from "@/components/legal-page";
 
 export const metadata: Metadata = {
@@ -12,7 +13,7 @@ export default function PrivacyPage() {
     <LegalPage
       eyebrow="Legal"
       title="Privacy policy"
-      updated="September 1, 2026"
+      updated="September 2, 2026"
     >
       <p>
         GBP Auto Ranker (“we”, “us”) runs map-pack campaigns for Google
@@ -97,9 +98,7 @@ export default function PrivacyPage() {
       <h2>Contact</h2>
       <p>
         Privacy questions:{" "}
-        <a className="font-medium text-primary hover:underline" href="mailto:hello@info.gbpranker.com">
-          hello@info.gbpranker.com
-        </a>
+        <ContactEmail className="font-medium text-primary hover:underline" />
         .
       </p>
     </LegalPage>

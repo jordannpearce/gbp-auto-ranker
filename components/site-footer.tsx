@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { ContactEmail } from "@/components/contact-email";
 
 export function SiteFooter() {
   return (
@@ -40,6 +41,7 @@ export function SiteFooter() {
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>© {new Date().getFullYear()} GBP Auto Ranker. Built for local businesses that want to show up first.</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <ContactEmail className="hover:text-primary" />
             <Link href="/privacy" className="hover:text-primary">
               Privacy
             </Link>
