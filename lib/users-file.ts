@@ -274,6 +274,59 @@ export async function createUser(input: {
   });
 }
 
+export async function updateUser(
+  id: string,
+  update: {
+    name?: string;
+    email?: string;
+    role?: User["role"];
+    agencyId?: string;
+    password?: string;
+  },
+) {
+  return withLock(async () => {
+    const users = await readUsers();
+    const index = users.findIndex((user) => user.id === id);
+    if (index === -1) return { error: "That user was not found." as const };
+    const email = update.email?.trim().toLowerCase();
+    if (
+      email &&
+      users.some((user) => user.id !== id && user.email.toLowerCase() === email)
+    ) {
+      return { error: "An account with that email already exists." as const };
+    }
+    const current = users[index];
+    const next: User = {
+      ...current,
+      name: update.name?.trim() || current.name,
+      email: email || current.email,
+      role: update.role ?? current.role,
+      agencyId:
+        update.agencyId !== undefined ? update.agencyId : current.agencyId,
+      passwordHash: update.password
+        ? await hashPassword(update.password)
+        : current.passwordHash,
+    };
+    users[index] = next;
+    await writeJson(USERS_FILE, users);
+    return { user: next };
+  });
+}
+
+export async function deleteUser(id: string) {
+  return withLock(async () => {
+    const users = await readUsers();
+    const nextUsers = users.filter((user) => user.id !== id);
+    if (nextUsers.length === users.length) return false;
+    const resets = (await readJson<PasswordReset[]>(RESETS_FILE, [])).filter(
+      (item) => item.userId !== id,
+    );
+    await writeJson(USERS_FILE, nextUsers);
+    await writeJson(RESETS_FILE, resets);
+    return true;
+  });
+}
+
 export async function updateUserPassword(id: string, password: string) {
   return withLock(async () => {
     const users = await readUsers();
@@ -416,7 +469,7 @@ export async function deleteAgency(id: string) {
 
 export async function updateAgency(
   id: string,
-  update: Partial<Pick<Agency, "name" | "website" | "leadPreference">>,
+  update: Partial<Pick<Agency, "name" | "website" | "leadPreference" | "ownerUserId">>,
 ) {
   return withLock(async () => {
     await ensureAccounts();
@@ -434,6 +487,10 @@ export async function updateAgency(
         update.leadPreference !== undefined
           ? normalizeLeadPreference(update.leadPreference)
           : agencies[index].leadPreference,
+      ownerUserId:
+        update.ownerUserId !== undefined
+          ? update.ownerUserId
+          : agencies[index].ownerUserId,
     };
     agencies[index] = next;
     await writeJson(AGENCIES_FILE, agencies);

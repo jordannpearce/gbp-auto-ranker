@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { canEditAgency, isAdmin } from "@/lib/access";
+import { setAgencyOwner } from "@/lib/account-admin";
 import { getCurrentUser } from "@/lib/auth";
 import { redirectTo } from "@/lib/http";
 import { parseLeadPreference } from "@/lib/leads";
@@ -33,6 +34,40 @@ export async function POST(
   const adminReturn = `/dashboard/agencies/${id}`;
   const returnTo = isAdmin(user) ? adminReturn : ownerReturn;
 
+  if (intent === "details") {
+    if (!isAdmin(user)) {
+      return redirectTo("/dashboard");
+    }
+    const name = String(form.get("agencyName") ?? "").trim();
+    const website = String(form.get("website") ?? "").trim();
+    if (!name) {
+      return redirectTo(
+        `${adminReturn}?error=${encodeURIComponent("Agency name is required.")}`,
+      );
+    }
+    await updateAgency(id, { name, website });
+    return redirectTo(`${adminReturn}?details=1`);
+  }
+
+  if (intent === "owner") {
+    if (!isAdmin(user)) {
+      return redirectTo("/dashboard");
+    }
+    const ownerUserId = String(form.get("ownerUserId") ?? "").trim();
+    if (!ownerUserId) {
+      return redirectTo(
+        `${adminReturn}?error=${encodeURIComponent("Choose a login to own this agency.")}`,
+      );
+    }
+    const result = await setAgencyOwner(id, ownerUserId);
+    if (result && "error" in result) {
+      return redirectTo(
+        `${adminReturn}?error=${encodeURIComponent(result.error ?? "Could not save that owner.")}`,
+      );
+    }
+    return redirectTo(`${adminReturn}?details=1`);
+  }
+
   if (intent === "save") {
     if (!canEditAgency(user, id)) {
       return redirectTo("/dashboard");
@@ -52,7 +87,7 @@ export async function POST(
   }
   if (!confirmedDuplicate(form)) {
     return redirectTo(
-      `/dashboard/agencies/${id}?error=${encodeURIComponent("Tick the box to confirm you are removing a duplicate agency.")}`,
+      `/dashboard/agencies/${id}?error=${encodeURIComponent("Tick the box to confirm you want to delete this agency.")}`,
     );
   }
 

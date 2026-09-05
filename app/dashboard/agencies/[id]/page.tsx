@@ -7,6 +7,8 @@ import { LeadPreferenceField } from "@/components/lead-preference-field";
 import { NotifyAgencyField } from "@/components/notify-agency-field";
 import { selectClassName } from "@/components/field";
 import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { isAdmin, roleLabel } from "@/lib/access";
 import { loadDashboardUser } from "@/lib/dashboard";
 import {
@@ -15,7 +17,7 @@ import {
 } from "@/lib/leads";
 import { assignmentNotifyMessage } from "@/lib/notify";
 import { listCustomers } from "@/lib/store";
-import { getAgency, listAgencyUsers } from "@/lib/users";
+import { getAgency, listAgencyUsers, listUsers } from "@/lib/users";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +40,7 @@ export default async function AgencyDetailPage({
     error?: string;
     saved?: string;
     created?: string;
+    details?: string;
     preference?: string;
     notified?: string;
     agencyTo?: string;
@@ -47,16 +50,26 @@ export default async function AgencyDetailPage({
   const { user, agency: currentAgency } = await loadDashboardUser();
   if (!isAdmin(user)) redirect("/dashboard");
   const { id } = await params;
-  const { error, saved, created, preference, notified, agencyTo, mailError } =
-    await searchParams;
+  const {
+    error,
+    saved,
+    created,
+    details,
+    preference,
+    notified,
+    agencyTo,
+    mailError,
+  } = await searchParams;
   const mailNote = assignmentNotifyMessage(notified, agencyTo, mailError);
   const agency = await getAgency(id);
   if (!agency) notFound();
 
-  const [members, customers] = await Promise.all([
+  const [members, customers, users] = await Promise.all([
     listAgencyUsers(id),
     listCustomers(),
+    listUsers(),
   ]);
+  const ownerChoices = users.filter((item) => item.role !== "admin");
   const assigned = customers.filter((customer) => customer.agencyId === id);
   const unassigned = customers.filter((customer) => !customer.agencyId);
 
@@ -84,6 +97,11 @@ export default async function AgencyDetailPage({
               temporary password you set.
             </p>
           ) : null}
+          {details ? (
+            <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              Agency saved.
+            </p>
+          ) : null}
           {error ? (
             <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
@@ -107,6 +125,100 @@ export default async function AgencyDetailPage({
             </Link>
           </div>
         </div>
+
+        <section className="rounded-2xl border border-border bg-white p-6">
+          <h2 className="text-base font-semibold text-charcoal">
+            Agency details
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Change the public name and website. The owner login can be moved
+            from Users if you need a different person.
+          </p>
+          <form
+            action={`/api/agencies/${agency.id}`}
+            method="post"
+            className="mt-4 grid gap-4 sm:grid-cols-2"
+          >
+            <input type="hidden" name="intent" value="details" />
+            <div>
+              <Label htmlFor="agencyName">Agency name</Label>
+              <Input
+                id="agencyName"
+                name="agencyName"
+                required
+                defaultValue={agency.name}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                name="website"
+                type="url"
+                defaultValue={agency.website}
+                className="mt-2"
+                placeholder="https://youragency.com"
+              />
+            </div>
+            <button
+              type="submit"
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-10 px-4 sm:w-fit",
+              )}
+            >
+              Save details
+            </button>
+          </form>
+        </section>
+
+        <section className="rounded-2xl border border-border bg-white p-6">
+          <h2 className="text-base font-semibold text-charcoal">
+            Agency owner
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The owner can add teammates. Choosing a login here moves them onto
+            this agency as the owner. The previous owner stays as an agency
+            user.
+          </p>
+          <form
+            action={`/api/agencies/${agency.id}`}
+            method="post"
+            className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
+          >
+            <input type="hidden" name="intent" value="owner" />
+            <div>
+              <Label htmlFor="ownerUserId">Owner login</Label>
+              <select
+                id="ownerUserId"
+                name="ownerUserId"
+                required
+                defaultValue={agency.ownerUserId}
+                className={cn(selectClassName, "mt-2")}
+              >
+                <option value="">Choose a login</option>
+                {ownerChoices.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} · {item.email} · {roleLabel(item.role)}
+                    {item.agencyId && item.agencyId !== agency.id
+                      ? " · other agency"
+                      : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="submit"
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-10 px-4",
+              )}
+            >
+              Save owner
+            </button>
+          </form>
+        </section>
 
         <section className="rounded-2xl border border-border bg-white p-6">
           <h2 className="text-base font-semibold text-charcoal">
@@ -225,12 +337,22 @@ export default async function AgencyDetailPage({
             <ul className="mt-4 divide-y divide-border">
               {members.map((member) => (
                 <li key={member.id} className="py-3">
-                  <p className="font-medium">{member.name}</p>
+                  <Link
+                    href={`/dashboard/team/${member.id}`}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    {member.name}
+                  </Link>
                   <p className="text-sm text-muted-foreground">
                     {member.email} · {roleLabel(member.role)}
                   </p>
                 </li>
               ))}
+              {members.length === 0 ? (
+                <li className="py-3 text-sm text-muted-foreground">
+                  No users on this agency yet.
+                </li>
+              ) : null}
             </ul>
           </div>
           <div className="rounded-2xl border border-border bg-white p-6">
@@ -263,12 +385,12 @@ export default async function AgencyDetailPage({
 
         <section className="rounded-2xl border border-red-200 bg-red-50/60 p-6">
           <h2 className="text-base font-semibold text-charcoal">
-            Remove a duplicate agency
+            Delete this agency
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Deletes this agency and its team logins. Client listings stay in
-            the dashboard and become unassigned so you can attach them to the
-            real agency. Business-owner logins are kept.
+            Deletes the agency and its owner and team logins. Client listings
+            stay and become unassigned. Business-owner logins are kept and
+            unhooked from this agency.
           </p>
           <form
             action={`/api/agencies/${agency.id}`}
@@ -284,7 +406,7 @@ export default async function AgencyDetailPage({
                 required
                 className="mt-1 size-4 accent-red-700"
               />
-              <span>Yes, this is a duplicate agency and I want it deleted.</span>
+              <span>Yes, delete this agency and its team logins.</span>
             </label>
             <button
               type="submit"

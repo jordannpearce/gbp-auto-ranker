@@ -248,6 +248,63 @@ export async function createUser(input: {
   return { user };
 }
 
+export async function updateUser(
+  id: string,
+  update: {
+    name?: string;
+    email?: string;
+    role?: User["role"];
+    agencyId?: string;
+    password?: string;
+  },
+) {
+  await ensureAccounts();
+  const current = await getUser(id);
+  if (!current) return { error: "That user was not found." as const };
+  const email = update.email?.trim().toLowerCase();
+  if (email) {
+    const existing = await getUserByEmail(email);
+    if (existing && existing.id !== id) {
+      return { error: "An account with that email already exists." as const };
+    }
+  }
+  const next: User = {
+    ...current,
+    name: update.name?.trim() || current.name,
+    email: email || current.email,
+    role: update.role ?? current.role,
+    agencyId: update.agencyId !== undefined ? update.agencyId : current.agencyId,
+    passwordHash: update.password
+      ? await hashPassword(update.password)
+      : current.passwordHash,
+  };
+  await query(
+    `UPDATE users
+     SET name = $2, email = $3, password_hash = $4, role = $5, agency_id = $6
+     WHERE id = $1`,
+    [
+      id,
+      next.name,
+      next.email,
+      next.passwordHash,
+      next.role,
+      next.agencyId,
+    ],
+  );
+  return { user: next };
+}
+
+export async function deleteUser(id: string) {
+  await ensureAccounts();
+  const user = await getUser(id);
+  if (!user) return false;
+  await withTransaction(async (client) => {
+    await client.query("DELETE FROM password_resets WHERE user_id = $1", [id]);
+    await client.query("DELETE FROM users WHERE id = $1", [id]);
+  });
+  return true;
+}
+
 export async function updateUserPassword(id: string, password: string) {
   const result = await query(
     "UPDATE users SET password_hash = $2 WHERE id = $1",
@@ -399,7 +456,7 @@ export async function deleteAgency(id: string) {
 
 export async function updateAgency(
   id: string,
-  update: Partial<Pick<Agency, "name" | "website" | "leadPreference">>,
+  update: Partial<Pick<Agency, "name" | "website" | "leadPreference" | "ownerUserId">>,
 ) {
   await ensureAccounts();
   const agency = await getAgency(id);
@@ -413,10 +470,12 @@ export async function updateAgency(
       update.leadPreference !== undefined
         ? normalizeLeadPreference(update.leadPreference)
         : agency.leadPreference,
+    ownerUserId:
+      update.ownerUserId !== undefined ? update.ownerUserId : agency.ownerUserId,
   };
   await query(
-    `UPDATE agencies SET name = $2, website = $3, lead_preference = $4 WHERE id = $1`,
-    [id, next.name, next.website, next.leadPreference],
+    `UPDATE agencies SET name = $2, website = $3, lead_preference = $4, owner_user_id = $5 WHERE id = $1`,
+    [id, next.name, next.website, next.leadPreference, next.ownerUserId],
   );
   return next;
 }

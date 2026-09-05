@@ -49,6 +49,17 @@ export async function updateUserPassword(id: string, password: string) {
   return repo().updateUserPassword(id, password);
 }
 
+export async function updateUser(
+  id: string,
+  update: Parameters<typeof file.updateUser>[1],
+) {
+  return repo().updateUser(id, update);
+}
+
+export async function deleteUser(id: string) {
+  return repo().deleteUser(id);
+}
+
 export async function issueConfirmToken(userId: string) {
   return repo().issueConfirmToken(userId);
 }

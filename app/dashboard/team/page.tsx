@@ -27,10 +27,10 @@ export const dynamic = "force-dynamic";
 export default async function TeamPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; removed?: string }>;
 }) {
   const { user, agency } = await loadDashboardUser();
-  const { error, saved } = await searchParams;
+  const { error, saved, removed } = await searchParams;
   const [agencies, customers] = await Promise.all([
     listAgencies(),
     listCustomers(),
@@ -51,7 +51,7 @@ export default async function TeamPage({
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             {isAdmin(user)
-              ? "A user is a login. A customer is a listing. Business owners only appear on Customers after you add a listing and attach it to them. Check boxes to email specific logins."
+              ? "A user is a login. A customer is a listing. Open a user to edit, delete, or move them to an agency. Business owners only appear on Customers after a listing is attached. Check boxes to email specific logins."
               : "Add users so more people at the agency can manage the same client book."}
           </p>
         </div>
@@ -91,7 +91,9 @@ export default async function TeamPage({
                       defaultValue=""
                       className={cn(selectClassName, "mt-2")}
                     >
-                      <option value="">None — admin or business owner</option>
+                      <option value="">
+                        None — admin, or an independent business owner
+                      </option>
                       {agencies.map((item) => (
                         <option key={item.id} value={item.id}>
                           {item.name}
@@ -147,8 +149,9 @@ export default async function TeamPage({
               </button>
               {isAdmin(user) ? (
                 <p className="sm:col-span-2 text-xs leading-5 text-muted-foreground">
-                  Creating a business owner only creates their login. Add a
-                  listing and assign that owner so they show on Customers.
+                  Agency roles need an agency. A business owner can stay
+                  independent or be attached to an agency. Add a listing and
+                  assign that owner so they show on Customers.
                 </p>
               ) : null}
             </form>
@@ -156,6 +159,11 @@ export default async function TeamPage({
         ) : null}
 
         <section className="overflow-hidden rounded-2xl border border-border bg-white">
+          {removed ? (
+            <p className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              Login deleted.
+            </p>
+          ) : null}
           {members.length === 0 ? (
             <p className="px-5 py-10 text-sm text-muted-foreground">
               No users yet. Add someone above.
@@ -205,9 +213,25 @@ export default async function TeamPage({
                             : "md:grid-cols-[1.2fr_1.2fr_1fr_1.4fr_0.8fr_auto]",
                         )}
                       >
-                        <p className="font-medium text-charcoal">
-                          {member.name}
-                        </p>
+                        <div>
+                          {isAdmin(user) ? (
+                            <Link
+                              href={`/dashboard/team/${member.id}`}
+                              className="font-medium text-primary hover:underline"
+                            >
+                              {member.name}
+                            </Link>
+                          ) : (
+                            <p className="font-medium text-charcoal">
+                              {member.name}
+                            </p>
+                          )}
+                          {isAdmin(user) ? (
+                            <p className="text-xs text-muted-foreground">
+                              Edit or move
+                            </p>
+                          ) : null}
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           {member.email}
                         </p>

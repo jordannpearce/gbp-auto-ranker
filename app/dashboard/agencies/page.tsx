@@ -41,9 +41,9 @@ export default async function AgenciesPage() {
               Agencies
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Add an agency yourself, or open one to assign customers, see
-              their exclusive or shared lead preference, or remove a duplicate.
-              Check boxes to email the owner or first team inbox.
+              Open an agency to edit its name, website, or owner, assign
+              customers, or delete it. Check boxes to email the owner or first
+              team inbox.
             </p>
           </div>
           <Link
