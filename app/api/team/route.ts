@@ -7,6 +7,18 @@ import { isStrongPassword } from "@/lib/passwords";
 import { USER_ROLES, type UserRole } from "@/lib/types";
 import { createUser, getAgency } from "@/lib/users";
 
+function failToTeam(
+  message: string,
+  fields: { name?: string; email?: string; role?: string; agencyId?: string },
+) {
+  const params = new URLSearchParams({ error: message });
+  if (fields.name) params.set("name", fields.name);
+  if (fields.email) params.set("email", fields.email);
+  if (fields.role) params.set("role", fields.role);
+  if (fields.agencyId) params.set("agencyId", fields.agencyId);
+  return redirectTo(`/dashboard/team?${params}`);
+}
+
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user || !canManageTeam(user)) {
@@ -29,20 +41,29 @@ export async function POST(request: Request) {
       : user.agencyId,
   );
   if ("error" in placement) {
-    return redirectTo(
-      `/dashboard/team?error=${encodeURIComponent(placement.error)}`,
-    );
+    return failToTeam(placement.error, {
+      name,
+      email,
+      role: requested,
+      agencyId: String(form.get("agencyId") ?? ""),
+    });
   }
   const { role, agencyId } = placement;
   if (!name || !email || !password) {
-    return redirectTo(
-      `/dashboard/team?error=${encodeURIComponent("Name, email, and password are required.")}`,
-    );
+    return failToTeam("Name, email, and password are required.", {
+      name,
+      email,
+      role: requested,
+      agencyId,
+    });
   }
   if (!isStrongPassword(password)) {
-    return redirectTo(
-      `/dashboard/team?error=${encodeURIComponent("Password must be at least 8 characters.")}`,
-    );
+    return failToTeam("Password must be at least 8 characters.", {
+      name,
+      email,
+      role: requested,
+      agencyId,
+    });
   }
 
   const created = await createUser({
@@ -54,9 +75,12 @@ export async function POST(request: Request) {
     verified: true,
   });
   if ("error" in created) {
-    return redirectTo(
-      `/dashboard/team?error=${encodeURIComponent(created.error ?? "Could not add that user.")}`,
-    );
+    return failToTeam(created.error ?? "Could not add that user.", {
+      name,
+      email,
+      role,
+      agencyId,
+    });
   }
 
   if (role === "admin" || role === "business_owner") {

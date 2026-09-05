@@ -27,10 +27,19 @@ export const dynamic = "force-dynamic";
 export default async function TeamPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; saved?: string; removed?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    saved?: string;
+    removed?: string;
+    name?: string;
+    email?: string;
+    role?: string;
+    agencyId?: string;
+  }>;
 }) {
   const { user, agency } = await loadDashboardUser();
-  const { error, saved, removed } = await searchParams;
+  const { error, saved, removed, name, email, role, agencyId } =
+    await searchParams;
   const [agencies, customers] = await Promise.all([
     listAgencies(),
     listCustomers(),
@@ -74,7 +83,7 @@ export default async function TeamPage({
                       id="role"
                       name="role"
                       required
-                      defaultValue="agency_member"
+                      defaultValue={role || "agency_member"}
                       className={cn(selectClassName, "mt-2")}
                     >
                       <option value="admin">Admin</option>
@@ -88,11 +97,11 @@ export default async function TeamPage({
                     <select
                       id="agencyId"
                       name="agencyId"
-                      defaultValue=""
+                      defaultValue={agencyId || ""}
                       className={cn(selectClassName, "mt-2")}
                     >
                       <option value="">
-                        None — admin, or an independent business owner
+                        None — use for admins, or a business owner with no agency
                       </option>
                       {agencies.map((item) => (
                         <option key={item.id} value={item.id}>
@@ -105,7 +114,13 @@ export default async function TeamPage({
               ) : null}
               <div>
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" required className="mt-2" />
+                <Input
+                  id="name"
+                  name="name"
+                  required
+                  defaultValue={name || ""}
+                  className="mt-2"
+                />
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
@@ -114,6 +129,7 @@ export default async function TeamPage({
                   name="email"
                   type="email"
                   required
+                  defaultValue={email || ""}
                   className="mt-2"
                 />
               </div>
@@ -149,9 +165,10 @@ export default async function TeamPage({
               </button>
               {isAdmin(user) ? (
                 <p className="sm:col-span-2 text-xs leading-5 text-muted-foreground">
-                  Agency roles need an agency. A business owner can stay
-                  independent or be attached to an agency. Add a listing and
-                  assign that owner so they show on Customers.
+                  Pick the role first, then the agency. Agency owner and agency
+                  user need an agency. A business owner can have an agency or
+                  stay independent. Add a listing and assign that owner so they
+                  show on Customers.
                 </p>
               ) : null}
             </form>
